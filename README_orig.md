@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Programming Assignment 4
 Welcome to CS224N Project Assignment 4 Reading Comprehension.
 The project has several dependencies that have to be satisfied before running the code. You can install them using your preferred method -- we list here the names of the packages using `pip`.
@@ -20,3 +21,6 @@ Note that you will always want to run your code from this assignment directory, 
 $ python code/train.py
 
 This ensures that any files created in the process don't pollute the code directoy.
+=======
+# 224nproject
+>>>>>>> 2ab3b9f49a61488d2a54dd591c7a8196f6fd131e
