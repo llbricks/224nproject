@@ -565,18 +565,18 @@ if __name__ == "__main__":
 
     command_parser = subparsers.add_parser('test1', help='')
     command_parser.set_defaults(func=do_test1)
-
+    
     command_parser = subparsers.add_parser('test2', help='')
-    # command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train", help="Training data")
-    # command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="data/tiny.conll", help="Dev data")
-    # command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default="data/vocab.txt", help="Path to vocabulary file")
-    # command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default="data/wordVectors.txt", help="Path to word vectors file")
+    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
+    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
+    command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default='../../data/squad/vocab.dat', help="Path to vocabulary file")
+    command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default='../../data/squad/glove.trimmed.50.npz', help="Path to word vectors file")
     command_parser.add_argument('-c', '--cell', choices=["rnn", "gru"], default="rnn", help="Type of RNN cell to use.")
     command_parser.set_defaults(func=do_test2)
 
     command_parser = subparsers.add_parser('train', help='')
-    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="data/train.conll", help="Training data")
-    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="data/dev.conll", help="Dev data")
+    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
+    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
     command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default="data/vocab.txt", help="Path to vocabulary file")
     command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default="data/wordVectors.txt", help="Path to word vectors file")
     command_parser.add_argument('-c', '--cell', choices=["rnn", "gru"], default="rnn", help="Type of RNN cell to use.")

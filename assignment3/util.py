@@ -156,6 +156,24 @@ def load_word_vector_mapping(vocab_fstream, vector_fstream):
 
     return ret
 
+def load_word_vector_mapping_np(vocab_filename, vector_filename):
+    """
+    Load word vector mapping using @vocab_fstream, @vector_fstream.
+    Assumes each line of the vocab file matches with those of the vector
+    file.
+    """
+    gloveVectors = np.load('../../data/squad/glove.trimmed.50.npz')['glove']
+    vocabulary = open('../../data/squad/vocab.dat').read().split('\n')
+    ret = OrderedDict()
+    for i in range(len(vocabulary)-1): 
+        ret[vocabulary[i]]=gloveVectors[i]
+        #print(vocab, vector)
+        # vocab = vocab.strip()
+        # vector = vector.strip()
+        # ret[vocab] = array(list(map(float, vector.split())))
+
+    return ret
+
 def test_load_word_vector_mapping():
     vocab = """UUUNKKK
 the
