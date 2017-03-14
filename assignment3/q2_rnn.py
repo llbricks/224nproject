@@ -117,8 +117,8 @@ def pad_sequences(data, max_length):
             mask = [True]*(max_length-extraLen) + [False]*extraLen
         else: 
             mask = [True]*max_length
-        print(sent)
-        print(len(sent))
+        #print(sent)
+        #print(len(sent))
         ret.append((sent,lab,mask))
         ### END YOUR CODE ###
     return ret
@@ -129,7 +129,7 @@ class RNNModel(NERModel):
     single hidden layer.
     This network will predict a sequence of labels (e.g. PER) for a
     given token (e.g. Henry) using a featurized window around the token.
-    """list
+    """
 
     def add_placeholders(self):
         """Generates placeholder variables to represent the input tensors
