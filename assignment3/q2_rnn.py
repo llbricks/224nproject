@@ -12,6 +12,7 @@ import logging
 import sys
 import time
 from datetime import datetime
+import copy
 
 import numpy as np
 import tensorflow as tf
@@ -102,19 +103,23 @@ def pad_sequences(data, max_length):
     zero_label = 4 # corresponds to the 'O' tag
 
     for sentence, labels in data:
+        sent = copy.deepcopy(sentence)
+        lab = copy.deepcopy(labels)
         ### YOUR CODE HERE (~4-6 lines)
-        if len(sentence)>max_length:
-            sentence = sentence[0:max_length]
-            labels = labels[0:max_length]
-        if len(sentence)<max_length:
-            extraLen = max_length-len(sentence)
-            wordLen = len(sentence[0])
-            sentence = sentence+[[0]*wordLen]*extraLen
-            labels = labels+[4]*extraLen
+        if len(sent)>max_length:
+            sent = sent[0:max_length]
+            lab = lab[0:max_length]
+        if len(sent)<max_length:
+            extraLen = max_length-len(sent)
+            wordLen = len(sent[0])
+            sent = sent+[[0]*wordLen]*extraLen
+            lab = lab+[4]*extraLen
             mask = [True]*(max_length-extraLen) + [False]*extraLen
         else: 
             mask = [True]*max_length
-        ret.append((sentence,labels,mask))
+        print(sent)
+        print(len(sent))
+        ret.append((sent,lab,mask))
         ### END YOUR CODE ###
     return ret
 
@@ -124,7 +129,7 @@ class RNNModel(NERModel):
     single hidden layer.
     This network will predict a sequence of labels (e.g. PER) for a
     given token (e.g. Henry) using a featurized window around the token.
-    """
+    """list
 
     def add_placeholders(self):
         """Generates placeholder variables to represent the input tensors
