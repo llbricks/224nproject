@@ -100,7 +100,7 @@ def pad_sequences(data, max_length):
 
     # Use this zero vector when padding sequences.
     zero_vector = [0] * Config.n_features
-    zero_label = 4 # corresponds to the 'O' tag
+    zero_label = 0 # corresponds to the 'O' tag
 
     for sentence, labels in data:
         sent = copy.deepcopy(sentence)
@@ -113,7 +113,7 @@ def pad_sequences(data, max_length):
             extraLen = max_length-len(sent)
             wordLen = len(sent[0])
             sent = sent+[[0]*wordLen]*extraLen
-            lab = lab+[4]*extraLen
+            lab = lab+[zero_label]*extraLen
             mask = [True]*(max_length-extraLen) + [False]*extraLen
         else: 
             mask = [True]*max_length
@@ -577,10 +577,10 @@ if __name__ == "__main__":
     command_parser.set_defaults(func=do_test1)
     
     command_parser = subparsers.add_parser('test2', help='')
-    #command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
-    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/tiny.conll", help="Training data")
-    #command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
-    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/tiny.conll", help="Dev data")
+    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
+    # command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/tiny.conll", help="Training data")
+    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
+    # command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/tiny.conll", help="Dev data")
     #command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default='../../data/squad/vocab.dat', help="Path to vocabulary file")
     command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default='../../data/vocab.txt', help="Path to vocabulary file")
     #command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default='../../data/squad/glove.trimmed.50.npz', help="Path to word vectors file")

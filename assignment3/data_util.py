@@ -7,6 +7,7 @@ import os
 import pickle
 import logging
 from collections import Counter
+import copy
 
 import numpy as np
 from util import read_conll, read_json, one_hot, window_iterator, ConfusionMatrix, load_word_vector_mapping, load_word_vector_mapping_np
@@ -138,39 +139,69 @@ class ModelHelper(object):
 
 def load_and_preprocess_data(args):
     logger.info("Loading training data...")
-    #train = read_json('../../data/squad/train')
-    train = read_conll(args.data_train)
+    train = read_json('../../data/squad/train')
+    # train = read_conll(args.data_train)
     logger.info("Done. Read %d sentences", len(train))
     logger.info("Loading dev data...")
-    dev = read_conll(args.data_dev)
-    #dev = read_json('../../data/squad/val')
+    # dev = read_conll(args.data_dev)
+    dev = read_json('../../data/squad/val')
     logger.info("Done. Read %d sentences", len(dev))
     #print('step1:',train[0])
-    """
+    
     # concat questions and context
     train_concat = []
+    # train_copy = copy.deepcopy(train)
     for question,context,ans in train:
         if question != []:        
-            ans_long = ["NOT"]*len(question+context)
-            ans_long[len(question)+ans[0]:len(question)+ans[1]] = ["ANS"]*(ans[1]-ans[0]+1)
+            ans_long = ["NOT"]*(len(question+context))
+            if ans[0] == ans[1]:
+                ans_long[len(question)+ans[0]-1] = "ANS"
+            else:
+                ans_long[len(question)+ans[0]:len(question)+ans[1]+1] = ["ANS"]*(ans[1]-ans[0]+1)
             train_concat.append((question + context, ans_long))
-    #print(train_concat[0])
+    train = train_concat
+
     dev_concat = []
     for question,context,ans in dev:
-        if question != []:
-            ans_long = ["NOT"]*len(question+context)
-            ans_long[len(question)+ans[0]:len(question)+ans[1]] = ["ANS"]*(ans[1]-ans[0]+1)
+        if question != []:        
+            ans_long = ["NOT"]*(len(question+context))
+            if ans[0] == ans[1]:
+                ans_long[len(question)+ans[0]-1] = "ANS"
+            else:
+                ans_long[len(question)+ans[0]:len(question)+ans[1]+1] = ["ANS"]*(ans[1]-ans[0]+1)
             dev_concat.append((question + context, ans_long))
-    helper = ModelHelper.build(train_concat)
+    dev = dev_concat
     
-    # now process all the input data.
-    train_data = helper.vectorize(train_concat)
-    dev_data = helper.vectorize(dev_concat)
-    """
+    
     helper = ModelHelper.build(train)
 
     train_data = helper.vectorize(train)
     dev_data = helper.vectorize(dev)
+
+    # print(np.shape(train))
+    # print(np.shape(train[0]))
+    # print(np.shape(train[0][0]))
+    # print(np.shape(train[0][1]))
+    # print(train[0])
+
+    # print(type(train))
+    # print(type(train[0]))
+    # print(type(train[0][0]))
+    # print(type(train[0][1]))
+    # for i in range(np.shape(train)[0]):
+    #     if np.shape(train[i][0]) != np.shape(train[i][1]):
+    #         print('NO! DIFFERENT SHAPES!!')
+    #         print('questcont:',np.shape(train[i][0]))
+    #         print(train[i][0])
+    #         print('answeridx:',train_copy[i][2])
+    #         print('questcont:',np.shape(train[i][1]))
+    #         print(train[i][1])
+    #         print('qc Length:',len(train_copy[i][0]+train_copy[i][1]))
+    #         print('qc Length:',len(train_copy[i][0])+ len(train_copy[i][1]))
+
+    # print('nvm, sall good homie')
+
+
     
     return helper, train_data, dev_data, train, dev
 
