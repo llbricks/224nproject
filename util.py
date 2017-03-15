@@ -165,13 +165,8 @@ def load_word_vector_mapping_np(vocab_filename, vector_filename):
     gloveVectors = np.load('../../data/squad/glove.trimmed.50.npz')['glove']
     vocabulary = open('../../data/squad/vocab.dat').read().split('\n')
     ret = OrderedDict()
-    #print len(vocabulary)
-    #print len(gloveVectors)
     for i in range(len(vocabulary)-1): 
         ret[vocabulary[i]]=gloveVectors[i]
-	#print vocabulary[i]
-	#print gloveVectors[i]
-	#print type(gloveVectors[i])
         #print(vocab, vector)
         # vocab = vocab.strip()
         # vector = vector.strip()

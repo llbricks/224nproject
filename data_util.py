@@ -89,11 +89,8 @@ class ModelHelper(object):
         # Reserve 0 for the special NIL token.
 
         tok2id = build_dict((normalize(word) for sentence, _ in data for word in sentence), offset=1, max_words=10000)
-	#print tok2id
         tok2id.update(build_dict([P_CASE + c for c in CASES], offset=len(tok2id)))
-	#print tok2id
         tok2id.update(build_dict([START_TOKEN, END_TOKEN, UNK], offset=len(tok2id)))
-	#print tok2id
         assert sorted(tok2id.items(), key=lambda t: t[1])[0][1] == 1
         logger.info("Built dictionary for %d features.", len(tok2id))
 
@@ -138,17 +135,15 @@ class ModelHelper(object):
 
 def load_and_preprocess_data(args):
     logger.info("Loading training data...")
-    #train = read_json('../../data/squad/train')
-    train = read_conll(args.data_train)
+    train = read_json('../../data/squad/train')
     logger.info("Done. Read %d sentences", len(train))
     logger.info("Loading dev data...")
-    dev = read_conll(args.data_dev)
-    #dev = read_json('../../data/squad/val')
+    dev = read_json('../../data/squad/val')
     logger.info("Done. Read %d sentences", len(dev))
     #print('step1:',train[0])
 
     # concat questions and context
-    """train_concat = []
+    train_concat = []
     for question,context,ans in train:
         if question != []:        
             ans_long = ["NOT"]*len(question+context)
@@ -162,15 +157,10 @@ def load_and_preprocess_data(args):
             ans_long[len(question)+ans[0]:len(question)+ans[1]] = ["ANS"]*(ans[1]-ans[0]+1)
             dev_concat.append((question + context, ans_long))
     helper = ModelHelper.build(train_concat)
-    
+
     # now process all the input data.
     train_data = helper.vectorize(train_concat)
     dev_data = helper.vectorize(dev_concat)
-    """
-    helper = ModelHelper.build(train)
-
-    train_data = helper.vectorize(train)
-    dev_data = helper.vectorize(dev)
 
     return helper, train_data, dev_data, train, dev
 

@@ -77,7 +77,11 @@ class NERModel(Model):
     def run_epoch(self, sess, train_examples, dev_set, train_examples_raw, dev_set_raw):
         prog = Progbar(target=1 + int(len(train_examples) / self.config.batch_size))
         for i, batch in enumerate(minibatches(train_examples, self.config.batch_size)):
-            loss = self.train_on_batch(sess, *batch)
+            inputs, labels, mask = batch
+	    #print inputs.shape
+	    #print labels.shape
+ 	    #print mask.shape
+	    loss = self.train_on_batch(sess, *batch)
             prog.update(i + 1, [("train loss", loss)])
             if self.report: self.report.log_train_loss(loss)
         print("")
@@ -118,6 +122,7 @@ class NERModel(Model):
         best_score = 0.
 
         train_examples = self.preprocess_sequence_data(train_examples_raw)
+	#print train_examples
         dev_set = self.preprocess_sequence_data(dev_set_raw)
 
         for epoch in range(self.config.n_epochs):

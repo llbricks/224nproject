@@ -38,7 +38,7 @@ class Config:
     n_word_features = 2 # Number of features for every word in the input.
     window_size = 1
     n_features = (2 * window_size + 1) * n_word_features # Number of features for every word in the input.
-    max_length = 120#800 #120 # longest sequence to parse
+    max_length = 800 #120 # longest sequence to parse
     n_classes = 2
     dropout = 0.5
     embed_size = 50
@@ -189,13 +189,10 @@ class RNNModel(NERModel):
         feed_dict = {}
         if inputs_batch is not None:
                 feed_dict[self.input_placeholder] = inputs_batch
-#        	print inputs_batch
         if mask_batch is not None: 
                 feed_dict[self.mask_placeholder] = mask_batch
-#		print mask_batch
         if labels_batch is not None:
                 feed_dict[self.labels_placeholder] = labels_batch
-#		print labels_batch
         feed_dict[self.dropout_placeholder] = dropout
         ### END YOUR CODE
         return feed_dict
@@ -376,7 +373,6 @@ class RNNModel(NERModel):
                 ret.append((sentence_, labels))
             return ret
 
-	#print examples
         examples = featurize_windows(examples, self.helper.START, self.helper.END)
         return pad_sequences(examples, self.max_length)
 
@@ -420,7 +416,7 @@ class RNNModel(NERModel):
         self.build()
 
 def test_pad_sequences():
-    Config.n_features = 1
+    Config.n_features = 2
     data = [
         ([[4,1], [6,0], [7,0]], [1, 0, 0]),
         ([[3,0], [3,4], [4,5], [5,3], [3,4]], [0, 1, 0, 2, 3]),
@@ -446,7 +442,6 @@ def do_test2(args):
     logger.info("Testing implementation of RNNModel")
     config = Config(args)
     helper, train, dev, train_raw, dev_raw = load_and_preprocess_data(args)
-    #print train
     embeddings = load_embeddings(args, helper)
     config.embed_size = embeddings.shape[1]
 
@@ -577,23 +572,16 @@ if __name__ == "__main__":
     command_parser.set_defaults(func=do_test1)
     
     command_parser = subparsers.add_parser('test2', help='')
-    #command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
-    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="data/tiny.conll", help="Training data")
-    #command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
-    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="data/tiny.conll", help="Dev data")
-    #command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default='../../data/squad/vocab.dat', help="Path to vocabulary file")
-    command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default='data/vocab.txt', help="Path to vocabulary file")
-    #command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default='../../data/squad/glove.trimmed.50.npz', help="Path to word vectors file")
-    command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default='data/wordVectors.txt', help="Path to word vectors file")
-    
+    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
+    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
+    command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default='../../data/squad/vocab.dat', help="Path to vocabulary file")
+    command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default='../../data/squad/glove.trimmed.50.npz', help="Path to word vectors file")
     command_parser.add_argument('-c', '--cell', choices=["rnn", "gru"], default="rnn", help="Type of RNN cell to use.")
     command_parser.set_defaults(func=do_test2)
 
     command_parser = subparsers.add_parser('train', help='')
-#    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
-    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="data/dev.conll", help="Training data")
-#    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
-    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="data/dev.conll", help="Dev data")
+    command_parser.add_argument('-dt', '--data-train', type=argparse.FileType('r'), default="../../data/squad/train.context", help="Training data")
+    command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="../../data/squad/val.context", help="Dev data")
     command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default="data/vocab.txt", help="Path to vocabulary file")
     command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default="data/wordVectors.txt", help="Path to word vectors file")
     command_parser.add_argument('-c', '--cell', choices=["rnn", "gru"], default="rnn", help="Type of RNN cell to use.")
