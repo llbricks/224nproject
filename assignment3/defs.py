@@ -3,7 +3,7 @@
 """
 Common definitions for NER
 """
-
+#
 from util import one_hot
 
 #LBLS = ["ANS","NOT"]

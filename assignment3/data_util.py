@@ -146,9 +146,9 @@ def load_and_preprocess_data(args):
     #dev = read_json('../../data/squad/val')
     logger.info("Done. Read %d sentences", len(dev))
     #print('step1:',train[0])
-
+    """
     # concat questions and context
-    """train_concat = []
+    train_concat = []
     for question,context,ans in train:
         if question != []:        
             ans_long = ["NOT"]*len(question+context)
@@ -171,7 +171,7 @@ def load_and_preprocess_data(args):
 
     train_data = helper.vectorize(train)
     dev_data = helper.vectorize(dev)
-
+    
     return helper, train_data, dev_data, train, dev
 
 def load_embeddings(args, helper):
