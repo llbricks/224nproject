@@ -280,12 +280,13 @@ class RNNModel(NERModel):
         # RNNCell you defined, but for Q3, we will run this code again
         # with a GRU cell!
         if self.config.cell == "rnn":
-            cell = RNNCell(Config.n_features * Config.embed_size, Config.hidden_size)
+            cell = RNNCell(1, 1)
         elif self.config.cell == "gru":
-            cell = GRUCell(Config.n_features * Config.embed_size, Config.hidden_size)
+            cell = GRUCell(1, 1)
+        elif self.config.cell == "lstm":
+            cell = tf.nn.rnn_cell.LSTMCell(1)
         else:
-            raise ValueError("Unsuppported cell type: " + self.config.cell)
-
+            raise ValueError("Unsupported cell type.")
         # Define U and b2 as variables.
         # Initialize state as vector of zeros.
         ### YOUR CODE HERE (~4-6 lines)
@@ -601,7 +602,8 @@ if __name__ == "__main__":
     command_parser.add_argument('-dd', '--data-dev', type=argparse.FileType('r'), default="data/dev.conll", help="Dev data")
     command_parser.add_argument('-v', '--vocab', type=argparse.FileType('r'), default="data/vocab.txt", help="Path to vocabulary file")
     command_parser.add_argument('-vv', '--vectors', type=argparse.FileType('r'), default="data/wordVectors.txt", help="Path to word vectors file")
-    command_parser.add_argument('-c', '--cell', choices=["rnn", "gru"], default="rnn", help="Type of RNN cell to use.")
+    # command_parser.add_argument('-c', '--cell', choices=["rnn", "gru"], default="rnn", help="Type of RNN cell to use.")
+    command_parser.add_argument('-c', '--cell', choices=['rnn', 'gru', 'lstm'], default='rnn', help="Type of cell to use")
     command_parser.set_defaults(func=do_train)
 
     command_parser = subparsers.add_parser('evaluate', help='')
