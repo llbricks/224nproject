@@ -36,6 +36,8 @@ FLAGS = tf.app.flags.FLAGS
 
 
 def initialize_model(session, model, train_dir):
+    # initialize model with specific parameters
+    # generate fresh model parameters if no saved model is provided
     ckpt = tf.train.get_checkpoint_state(train_dir)
     v2_path = ckpt.model_checkpoint_path + ".index" if ckpt else ""
     if ckpt and (tf.gfile.Exists(ckpt.model_checkpoint_path) or tf.gfile.Exists(v2_path)):
@@ -49,11 +51,14 @@ def initialize_model(session, model, train_dir):
 
 
 def initialize_vocab(vocab_path):
+    # create dictionary mapping tokens to IDs
     if tf.gfile.Exists(vocab_path):
         rev_vocab = []
         with tf.gfile.GFile(vocab_path, mode="rb") as f:
             rev_vocab.extend(f.readlines())
+        # grab the list of all words in the vocab
         rev_vocab = [line.strip('\n') for line in rev_vocab]
+        # create a dictionary of the tuples of each word and its position in the list
         vocab = dict([(x, y) for (y, x) in enumerate(rev_vocab)])
         return vocab, rev_vocab
     else:
@@ -80,6 +85,16 @@ def main(_):
 
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
+
+    ids_context = open(FLAGS.data_dir + FLAGS.train_dir + '.ids.context').read().split('\n')
+    ids_question = open(FLAGS.data_dir + FLAGS.train_dir + '.ids.question').read().split('\n')
+    ids_answer = open(FLAGS.data_dir + FLAGS.train_dir + '.span').read().split('\n')
+    dataset = []
+    for k in xrange(len(ids_context)):
+        L = [map(int,ids_question[k].split())]
+        L.append(map(int, ids_context[k].split()))
+        L.append(map(int, ids_answer[k].split()))
+        dataset.append((L))
 
     embed_path = FLAGS.embed_path or pjoin("data", "squad", "glove.trimmed.{}.npz".format(FLAGS.embedding_size))
     vocab_path = FLAGS.vocab_path or pjoin(FLAGS.data_dir, "vocab.dat")

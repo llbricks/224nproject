@@ -212,7 +212,10 @@ class QASystem(object):
         :param log: whether we print to std out stream
         :return:
         """
-
+        # We want something here like output = model.output(session, dev_raw)
+        # and then give us from evaluate import exact_match_score, f1_score above
+        # we can also save our predictions on a dataset and call evaluate.py directly
+        
         f1 = 0.
         em = 0.
 
