@@ -81,7 +81,7 @@ class NERModel(Model):
 	    #print inputs.shape
 	    #print labels.shape
  	    #print mask.shape
-	    loss = self.train_on_batch(sess, *batch)
+            loss = self.train_on_batch(sess, *batch)
             prog.update(i + 1, [("train loss", loss)])
             if self.report: self.report.log_train_loss(loss)
         print("")

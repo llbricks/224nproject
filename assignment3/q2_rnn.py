@@ -38,7 +38,7 @@ class Config:
     n_word_features = 2 # Number of features for every word in the input.
     window_size = 1
     n_features = (2 * window_size + 1) * n_word_features # Number of features for every word in the input.
-    max_length = 120#800 #120 # longest sequence to parse
+    max_length = 800 #120 # longest sequence to parse
     n_classes = 2
     dropout = 0.5
     embed_size = 50
@@ -119,6 +119,10 @@ def pad_sequences(data, max_length):
             mask = [True]*max_length
         #print(sent)
         #print(len(sent))
+        print('sentence length :', len(sent))
+        print('labels length :', len(lab))
+        print('mask length :', len(mask))
+
         ret.append((sent,lab,mask))
         ### END YOUR CODE ###
     return ret

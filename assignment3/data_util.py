@@ -140,11 +140,15 @@ class ModelHelper(object):
 def load_and_preprocess_data(args):
     logger.info("Loading training data...")
     train = read_json('../../data/squad/train')
+    train = train[:100]
+    print(len(train))
     # train = read_conll(args.data_train)
     logger.info("Done. Read %d sentences", len(train))
     logger.info("Loading dev data...")
     # dev = read_conll(args.data_dev)
     dev = read_json('../../data/squad/val')
+    dev = dev[:40]
+
     logger.info("Done. Read %d sentences", len(dev))
     #print('step1:',train[0])
     
@@ -172,9 +176,7 @@ def load_and_preprocess_data(args):
             dev_concat.append((question + context, ans_long))
     dev = dev_concat
     
-    
     helper = ModelHelper.build(train)
-
     train_data = helper.vectorize(train)
     dev_data = helper.vectorize(dev)
 
