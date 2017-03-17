@@ -138,7 +138,7 @@ def generate_answers(sess, model, dataset, rev_vocab):
         # use the model to predict the start and end indices of the answer
         (a_s, a_e) = model.answer(sess, (question, context))
         # convert the indices to the string answer 
-        answer = ' '.join([rev_vocab[idx] for idx in range(a_s, a_e + 1)])
+        answer = ' '.join([rev_vocab[qustion[idx]] for idx in range(a_s, a_e + 1)])
         # add new prediction to dictionary of answers
         answers[question_uuid] = answer
 

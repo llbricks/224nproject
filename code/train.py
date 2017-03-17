@@ -9,6 +9,8 @@ import tensorflow as tf
 
 from qa_model import Encoder, QASystem, Decoder
 from os.path import join as pjoin
+# Added by Ryan
+from six.moves import xrange
 
 import logging
 
@@ -31,6 +33,7 @@ tf.app.flags.DEFINE_integer("print_every", 1, "How many iterations to do per pri
 tf.app.flags.DEFINE_integer("keep", 0, "How many checkpoints to keep, 0 indicates keep all.")
 tf.app.flags.DEFINE_string("vocab_path", "data/squad/vocab.dat", "Path to vocab file (default: ./data/squad/vocab.dat)")
 tf.app.flags.DEFINE_string("embed_path", "", "Path to the trimmed GLoVe embedding (default: ./data/squad/glove.trimmed.{embedding_size}.npz)")
+tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -85,7 +88,6 @@ def main(_):
 
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
-
     ids_context = open(FLAGS.data_dir + FLAGS.train_dir + '.ids.context').read().split('\n')
     ids_question = open(FLAGS.data_dir + FLAGS.train_dir + '.ids.question').read().split('\n')
     ids_answer = open(FLAGS.data_dir + FLAGS.train_dir + '.span').read().split('\n')
@@ -97,6 +99,9 @@ def main(_):
         dataset.append((L))
 
     embed_path = FLAGS.embed_path or pjoin("data", "squad", "glove.trimmed.{}.npz".format(FLAGS.embedding_size))
+    # We will also load the embeddings here
+    embeddings = np.load(embed_path)[FLAGS.embed_type]
+
     vocab_path = FLAGS.vocab_path or pjoin(FLAGS.data_dir, "vocab.dat")
     vocab, rev_vocab = initialize_vocab(vocab_path)
 
@@ -119,9 +124,11 @@ def main(_):
         initialize_model(sess, qa, load_train_dir)
 
         save_train_dir = get_normalized_train_dir(FLAGS.train_dir)
-        qa.train(sess, dataset, save_train_dir)
+        # qa.train(sess, dataset, save_train_dir)
+        qa.train(sess, dataset, embeddings, vocab, save_train_dir)
 
-        qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
+        # qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
+        qa.evaluate_answer(sess, dataset, rev_vocab, FLAGS.evaluate, log=True)
 
 if __name__ == "__main__":
     tf.app.run()
