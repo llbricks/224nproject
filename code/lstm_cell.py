@@ -35,19 +35,19 @@ class LSTMCell(tf.nn.rnn_cell.RNNCell):
 
         with tf.variable_scope(scope):
             ### YOUR CODE HERE (~20-30 lines)
-            W_c = tf.get_variable("W_c",(self.input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
+            W_c = tf.get_variable("W_c",(input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             U_c = tf.get_variable("U_c",(self.state_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             b_c = tf.get_variable("b_c",(self.state_size),initializer = tf.constant_initializer(0))
 
-            W_o = tf.get_variable("W_o",(self.input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
+            W_o = tf.get_variable("W_o",(input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             U_o = tf.get_variable("U_o",(self.state_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             b_o = tf.get_variable("b_o",(self.state_size),initializer = tf.constant_initializer(0))
 
-            W_i = tf.get_variable("W_i",(self.input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
+            W_i = tf.get_variable("W_i",(input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             U_i = tf.get_variable("U_i",(self.state_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             b_i = tf.get_variable("b_i",(self.state_size),initializer = tf.constant_initializer(0))
 
-            W_f = tf.get_variable("W_f",(self.input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
+            W_f = tf.get_variable("W_f",(input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             U_f = tf.get_variable("U_f",(self.state_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             b_f = tf.get_variable("b_f",(self.state_size),initializer = tf.constant_initializer(0))
 
