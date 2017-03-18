@@ -31,7 +31,8 @@ class LSTMCell():
 
         # It's always a good idea to scope variables in functions lest they
         # be defined elsewhere!
-        input_size = tf.shape(inputs)[1]
+        input_size = inputs.get_shape()[1]
+        print('Input size: ' , input_size)
 
         with tf.variable_scope(scope):
             ### YOUR CODE HERE (~20-30 lines)
@@ -50,13 +51,14 @@ class LSTMCell():
             W_f = tf.get_variable("W_f",(input_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             U_f = tf.get_variable("U_f",(self.state_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             b_f = tf.get_variable("b_f",(self.state_size),initializer = tf.constant_initializer(0))
-
-            h_t = o_t * np.tanh(c_t)
+            
+            o_t = tf.sigmoid(tf.matmul(inputs,W_o) + tf.matmul(state[0],U_o) + b_c)
             c_t = tf.matmul(state[1],f_t) + i_t*c_t_tilde
             c_t_tilde = np.tanh(tf.matmul(inputs,W_c) + tf.matmul(state[0],U_c) + b_c)
-            o_t = tf.sigmoid(tf.matmul(inputs,W_o) + tf.matmul(state[0],U_0) + b_c)
             i_t = tf.sigmoid(tf.mat_mul(inputs,W_i) + tf.matmul(state[0],U_i) + b_i)
             f_t = tf.sigmoid(tf.mat_mul(inputs,W_f) + tf.matmul(state[0],U_f) + b_f)
+
+            h_t = o_t * np.tanh(c_t)
 
             #o_t = tf.tanh(tf.matmul(inputs,U_o)+ r_t*tf.matmul(state,W_o) + b_o)
 
