@@ -12,6 +12,8 @@ from tensorflow.python.ops import variable_scope as vs
 from defs import LBLS
 from tensorflow.python.ops.gen_math_ops import _batch_mat_mul as batch_matmul
 
+from lstm_cell import LSTMCell
+
 from evaluate import exact_match_score, f1_score
 
 # imports added by Ryan
@@ -63,7 +65,7 @@ class Encoder(object):
         batch_size = tf.shape(inputs)[0]
         num_words = inputs.get_shape()[1]  #this should be either questions_max_length or context_max_length
 
-        lstm = tf.nn.rnn_cell.BasicLSTMCell(num_units= lstm_size, state_is_tuple = False)
+        lstm = LSTMCell(num_units= lstm_size)
 
 
         # LSTM for encoding the question

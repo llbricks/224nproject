@@ -17,7 +17,7 @@ from tensorflow.python.ops.gen_math_ops import _batch_mat_mul as batch_matmul
 # logger.setLevel(logging.DEBUG)
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
-class GRUCell(tf.nn.rnn_cell.RNNCell):
+class LSTMCell(tf.nn.rnn_cell.RNNCell):
     """Wrapper around our GRU cell implementation that allows us to play
     nicely with TensorFlow.
     """
@@ -94,7 +94,7 @@ class GRUCell(tf.nn.rnn_cell.RNNCell):
             o_t = tf.sigmoid(tf.matmul(inputs,W_o) + tf.matmul(state[0],U_0) + b_c)
 
             i_t = tf.sigmoid(tf.mat_mul(inputs,W_i) + tf.matmul(state[0],U_i) + b_i)
-            
+
             f_t = tf.sigmoid(tf.mat_mul(inputs,W_f) + tf.matmul(state[0],U_f) + b_f)
 
             #o_t = tf.tanh(tf.matmul(inputs,U_o)+ r_t*tf.matmul(state,W_o) + b_o)
