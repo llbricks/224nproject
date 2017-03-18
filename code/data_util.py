@@ -64,12 +64,16 @@ def labelize(span, max_length):
     ml = max_length
     labels = LBLS[-1] * ml
     # set appropriate labels positive
-    if span[0] < ml:
-        start = span[0]
-        end = min(span[1] + 1, ml)
-        labels[start:end] = LBLS[0] * (end - start)
+    # if span[0] < ml:
+    #     start = span[0]
+    #     end = min(span[1] + 1, ml)
+    #     labels[start:end] = LBLS[0] * (end - start)
+    if span[0]< ml: 
+        labels[span[0]] = LBLS[0]
+    if span[1]< ml: 
+        labels[span[1]] = LBLS[1]
 
-    assert len(labels) == max_length, "Decoder: 'knowledge_rep' is of the wrong shape!"
+    assert len(labels) == max_length, "Labelize: 'labels' is of the wrong shape!"
 
     return labels
 
@@ -82,7 +86,6 @@ def pad(word_vector, n_features, max_length):
     padding = zero_vector * pad_len
     word_vector = word_vector + padding
     word_vector_in = word_vector[:max_length]
-    word_vector_mask = [True] * (max_length - pad_len) 
-                    + [False] * pad_len
+    word_vector_mask = [True] * (max_length - pad_len) + [False] * pad_len
 
     return word_vector_in, word_vector_mask

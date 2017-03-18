@@ -10,6 +10,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 from tensorflow.python.ops import variable_scope as vs
 from defs import LBLS
+from tensorflow.python.ops.gen_math_ops import _batch_mat_mul as batch_matmul
 
 from evaluate import exact_match_score, f1_score
 
@@ -40,7 +41,7 @@ class Encoder(object):
         self.size = size
         self.vocab_dim = vocab_dim
 
-    def encode(self, inputs, masks, encoder_state_input,scope,lstm_size):
+    def encode(self, inputs, masks, scope, lstm_size, encoder_state_input = None):
         """
         In a generalized encode function, you pass in your inputs,
         masks, and an initial
@@ -55,28 +56,26 @@ class Encoder(object):
                  It can be context-level representation, word-level representation,
                  or both.
         """
+        print(tf.shape(inputs)[0])
         batch_size = tf.shape(inputs)[0]
-        num_words = tf.shape(inputs)[1]  #this should be either questions_max_length or context_max_length
+        num_words = inputs.get_shape()[1]  #this should be either questions_max_length or context_max_length
 
-        lstm = tf.contrib.rnn.BasicLSTMCell(lstm_size)
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(lstm_size, state_is_tuple = False)
 
         # LSTM for encoding the question
         encoded = []
-        h = encoder_state_input
+        print(lstm_size)
+        h = encoder_state_input or tf.zeros([batch_size, lstm_size])
         with tf.variable_scope(scope):
             for word_step in range(num_words):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-                output, h = lstm(inputs[:,word_step],h, scope = scope)*masks[:,word_setup]
+                print(h.get_shape())
+                print(inputs[:,word_step].get_shape())
+                output, h = lstm(inputs[:,word_step],h, scope = scope ) *masks[:,word_setup]
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
                 encoded.append(output)
-
-#                 # if we want different lstm_size and hidden_size, conversion layer will need to be here
-#                 # (along with initializing w and b tf.variables outside of this for loop)
-#                 #  just keep lstm_size = hidden_size for now, too complicated
-#                 logits = tf.matmul(output, W) + b
-#                 output = tf.nn.softmax(logits) # necessary?
         return (encoded, h)
 
 class Decoder(object):
@@ -100,8 +99,8 @@ class Decoder(object):
         # THIS JUST CONFUSES ME NOW
         # ----------------------------------------------------
         batch_size = tf.shape(knowledge_rep)[0]
-        passage_size = tf.shape(knowledge_rep)[0]
-        lstm = tf.contrib.rnn.BasicLSTMCell(lstm_size)
+        passage_size = knowledge_rep.get_shape()[0]
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(lstm_size, state_is_tuple = False)
 
         # LSTM for decoded_start
         decoded_probability = []
@@ -116,7 +115,7 @@ class Decoder(object):
             # make LSTM for this scope
             for time_step in range(passage_size):
                 output, h = lstm(knowledge_rep[:,self.question_max_length +time_step], h, scope = scope)
-                logits = tf.matmul(output, softmax_w) + softmax_b
+                logits = tf.batch_matmul(output, softmax_w) + softmax_b
                 # is it the logits we want?
                 decoded.append(logits)
 
@@ -135,13 +134,14 @@ class Decoder(object):
         :return:
         """
 
-        batch_size = tf.shape(question_state)[0]
-        context_size = tf.shape(context_words)[1]
-        lstm = tf.contrib.rnn.BasicLSTMCell(self.lstm_size)
+        batch_size = question_state.get_shape()[0]
+        context_size = context_words.get_shape()[1]
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size,state_is_tuple = False)
 
         # LSTM for decoded_start
         decoded_probability = []
-        h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
+        # h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
+        h = tf.zeros(shape = [self.batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope('SimpleDecoder'):
             #setup variables for this scope
             softmax_w = tf.get_variable("softmax_w",
@@ -150,15 +150,15 @@ class Decoder(object):
             softmax_b = tf.get_variable("softmax_b", tf.zeros(n_classes), dtype = tf.float32)
 
             # make predictions for each word
-            assert tf.shape(tf.concat(question_state,context_words[:,wordIdx],axis=1))[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-            assert tf.shape(tf.concat(question_state,context_words[:,wordIdx],axis=1))[0] == batch_size, 'Decode_simple: input is not expected shape'
+            assert tf.concat(question_state,context_words[:,wordIdx],axis=1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+            assert tf.concat(question_state,context_words[:,wordIdx],axis=1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
             for wordIdx in range(context_size):
                 logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
                 # do we need to apply softmax if we're using cross_entropy soft max?
                 decoded_probability.append(tf.nn.softmax(logits))
         assert length(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
-        assert tf.shape(decoded_probability[0])[0] == batch_size, 'Decode_simple: decoded is not expected shape'
-        assert tf.shape(decoded_probability[0])[1] == n_classes, 'Decode_simple: decoded is not expected shape'
+        assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
+        assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
 
         return decoded_probability
 
@@ -216,40 +216,42 @@ class QASystem(object):
         self.train_op = self.setup_training_op(self.loss)
 
     def setup_prediction_op(self):
-        h = tf.zeros(shape = [tf.shape(self.question_placeholder)[0], self.lstm_size], dtype = tf.float32)
+        # h = tf.zeros(shape = [self.question_placeholder.get_shape()[0], self.lstm_size], dtype = tf.float32)
+        # h = tf.zeros(shape = [self.batch_size, self.lstm_size], dtype = tf.float32)
 
         # Encode Question Input
-        print('question batch size @ setup:',tf.shape(self.question_placeholder)[0])
-        assert tf.shape(self.question_placeholder)[1] = self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!"
-        print('question mask batch size @ setup:',tf.shape(self.question_mask_placeholder)[0])
-        assert tf.shape(self.question_mask_placeholder)[1] = self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
+        print('question size @ setup:',self.question_placeholder.get_shape())
+        assert self.question_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!"
+        print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
+        assert self.question_mask_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
         encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
             masks = self.question_mask_placeholder,
-            encoder_state_input = h,
+            # encoder_state_input = h,
+            encoder_state_input = None,
             scope = "LSTM_encode_question",
             lstm_size = self.lstm_size)
 
-        print('encoded_questions batch size @ setup:',tf.shape(encoded_questions)[0])
-        assert tf.shape(self.encoded_questions)[1] = self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
-        print('h batch size @ setup:',tf.shape(h)[0])
-        assert tf.shape(self.h)[1] = self.lstm_size, "Setup System: 'h' is of the wrong shape!"
+        print('encoded_questions batch size @ setup:',encoded_questions.get_shape()[0])
+        assert self.encoded_questions.get_shape()[1] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
+        print('h batch size @ setup:',h.get_shape()[0])
+        assert self.h.get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
         # Encode Context Input
-        print('context batch size @ setup:',tf.shape(self.context_placeholder)[0])
-        assert tf.shape(self.context_placeholder)[1] = self.context_max_length, "Setup System: 'context_placeholder' is of the wrong shape!"
-        print('context mask batch size @ setup:',tf.shape(self.context_mask_placeholder)[0])
-        assert tf.shape(self.context_mask_placeholder)[1] = self.context_max_length, "Setup System: 'context_mask_placeholder' is of the wrong shape!"
+        print('context batch size @ setup:',self.context_placeholder.get_shape()[0])
+        assert self.context_placeholder.get_shape()[1] == self.context_max_length, "Setup System: 'context_placeholder' is of the wrong shape!"
+        print('context mask batch size @ setup:',self.context_mask_placeholder.get_shape()[0])
+        assert self.context_mask_placeholder.get_shape()[1] == self.context_max_length, "Setup System: 'context_mask_placeholder' is of the wrong shape!"
 
-        h = tf.zeros(shape = [tf.shape(self.context_placeholder)[0], self.lstm_size], dtype = tf.float32)
+        h = tf.zeros(shape = [self.context_placeholder.get_shape()[0], self.lstm_size], dtype = tf.float32)
         encoded_context, h = self.encoder.encode(inputs = self.context_placeholder,
             masks = self.context_mask_placeholder,
             encoder_state_input = q,
             scope = "LSTM_encode_context",
             lstm_size = self.lstm_size)
 
-        print('encoded_context batch size @ setup:',tf.shape(encoded_context)[0])
-        assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
+        print('encoded_context batch size @ setup:',encoded_context.get_shape[0])
+        assert self.encoded_context.get_shape()[1] == self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
 
         decoded_probability = self.decoder.decode_simple(question_state, encoded_context, self.lstm_size, self.n_classes)
 
@@ -314,7 +316,8 @@ class QASystem(object):
             feed_dict: The feed dictionary mapping from placeholders to values.
         """
         ### YOUR CODE (~6-10 lines)
-        feed_dict = {}
+        # feed_dict = {}
+        input_feed = {}
 
         if question_batch is not None:
             input_feed[self.question_placeholder] = question_batch
@@ -331,7 +334,8 @@ class QASystem(object):
         if context_mask_batch is not None:
             input_feed[self.context_mask_placeholder] = context_mask_batch
         
-        feed_dict[self.dropout_placeholder] = dropout
+        input_feed[self.dropout_placeholder] = dropout
+        # feed_dict[self.dropout_placeholder] = dropout
         ### END YOUR CODE
         return feed_dict
 
@@ -345,7 +349,8 @@ class QASystem(object):
                                       context_batch = context_batch, 
                                       question_mask_batch = question_mask_batch, 
                                       context_mask_batch = context_mask_batch, 
-                                      labels_batch = labels_batch)
+                                      labels_batch = labels_batch,
+                                      dropout = self.dropout)
 
         # fill in this feed_dictionary like:
         # input_feed['train_x'] = train_x
@@ -547,6 +552,6 @@ class QASystem(object):
 
         tic = time.time()
         params = tf.trainable_variables()
-        num_params = sum(map(lambda t: np.prod(tf.shape(t.value()).eval()), params))
+        num_params = sum(map(lambda t: np.prod(t.value().get_shape().eval()), params))
         toc = time.time()
         logging.info("Number of params: %d (retreival took %f secs)" % (num_params, toc - tic))

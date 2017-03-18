@@ -6,6 +6,7 @@ import os
 import json
 
 import tensorflow as tf
+import numpy as np
 
 from qa_model import Encoder, QASystem, Decoder
 from os.path import join as pjoin
@@ -24,15 +25,15 @@ tf.app.flags.DEFINE_integer("epochs", 10, "Number of epochs to train.")
 tf.app.flags.DEFINE_integer("state_size", 200, "Size of each model layer.")
 tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
 tf.app.flags.DEFINE_integer("embedding_size", 100, "Size of the pretrained vocabulary.")
-tf.app.flags.DEFINE_string("data_dir", "data/squad", "SQuAD directory (default ./data/squad)")
+tf.app.flags.DEFINE_string("data_dir", "../../data/squad/", "SQuAD directory (default ../../data/squad)")
 tf.app.flags.DEFINE_string("train_dir", "train", "Training directory to save the model parameters (default: ./train).")
 tf.app.flags.DEFINE_string("load_train_dir", "", "Training directory to load model parameters from to resume training (default: {train_dir}).")
 tf.app.flags.DEFINE_string("log_dir", "log", "Path to store log and flag files (default: ./log)")
 tf.app.flags.DEFINE_string("optimizer", "adam", "adam / sgd")
 tf.app.flags.DEFINE_integer("print_every", 1, "How many iterations to do per print.")
 tf.app.flags.DEFINE_integer("keep", 0, "How many checkpoints to keep, 0 indicates keep all.")
-tf.app.flags.DEFINE_string("vocab_path", "data/squad/vocab.dat", "Path to vocab file (default: ./data/squad/vocab.dat)")
-tf.app.flags.DEFINE_string("embed_path", "", "Path to the trimmed GLoVe embedding (default: ./data/squad/glove.trimmed.{embedding_size}.npz)")
+tf.app.flags.DEFINE_string("vocab_path", "../../data/squad/vocab.dat", "Path to vocab file (default: ../../data/squad/vocab.dat)")
+tf.app.flags.DEFINE_string("embed_path", "../../data/squad/glove.trimmed.100.npz", "Path to the trimmed GLoVe embedding (default: ../../data/squad/glove.trimmed.{embedding_size}.npz)")
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
@@ -92,50 +93,68 @@ def main(_):
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
 
+    # read training data
     context = open(FLAGS.data_dir + 'train.context').read().split('\n')
     question = open(FLAGS.data_dir + 'train.question').read().split('\n')
     answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
     train = []
-    for k in xrange(len(context)):
-        L = [map(int,question[k].split())]
-        L.append(map(int, context[k].split()))
-        L.append(map(int, answer_span[k].split()))
-        train.append((L))
+    for k in range(len(context)-1):
+        ans_intList = [int(value) for value in answer_span[k].split(' ')]
+        train.append((question[k].split(' '),context[k].split(' '),ans_intList)) 
 
+    # for k in xrange(len(context)):
+        # L = [map(int,question[k].split())]
+        # L.append(map(int, context[k].split()))
+        # L.append(map(int, answer_span[k].split()))
+        # train.append((L))
+
+    # read test data
     context = open(FLAGS.data_dir + 'val.context').read().split('\n')
     question = open(FLAGS.data_dir + 'val.question').read().split('\n')
     answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
     val = []
-    for k in xrange(len(context)):
-        L = [map(int,question[k].split())]
-        L.append(map(int, context[k].split()))
-        L.append(map(int, answer_span[k].split()))
-        val.append((L))
+    for k in range(len(context)-1):
+        ans_intList = [int(value) for value in answer_span[k].split(' ')]
+        val.append((question[k].split(' '),context[k].split(' '),ans_intList))
+
+    # for k in xrange(len(context)):
+    #     L = [map(int,question[k].split())]
+    #     L.append(map(int, context[k].split()))
+    #     L.append(map(int, answer_span[k].split()))
+    #     val.append((L))
+
 
     dataset = (train, val)
 
+    # read word embeddings
     embed_path = FLAGS.embed_path or pjoin("data", "squad", "glove.trimmed.{}.npz".format(FLAGS.embedding_size))
     # We will also load the embeddings here
     embeddings = np.load(embed_path)[FLAGS.embed_type]
 
+    #read word vocabularies
     vocab_path = FLAGS.vocab_path or pjoin(FLAGS.data_dir, "vocab.dat")
     vocab, rev_vocab = initialize_vocab(vocab_path)
-
+ 
+    # initialize encoder, decoder
     encoder = Encoder(size=FLAGS.state_size, vocab_dim=FLAGS.embedding_size)
     decoder = Decoder(output_size=FLAGS.output_size)
 
+    # create QA model
     # qa = QASystem(encoder, decoder)
     qa = QASystem(encoder, decoder, FLAGS)
 
+    # make log file
     if not os.path.exists(FLAGS.log_dir):
         os.makedirs(FLAGS.log_dir)
     file_handler = logging.FileHandler(pjoin(FLAGS.log_dir, "log.txt"))
     logging.getLogger().addHandler(file_handler)
 
+    # save flags 
     print(vars(FLAGS))
     with open(os.path.join(FLAGS.log_dir, "flags.json"), 'w') as fout:
         json.dump(FLAGS.__flags, fout)
 
+    # run training on QA model on training data 
     with tf.Session() as sess:
         load_train_dir = get_normalized_train_dir(FLAGS.load_train_dir or FLAGS.train_dir)
         initialize_model(sess, qa, load_train_dir)
