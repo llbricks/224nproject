@@ -58,9 +58,11 @@ class Encoder(object):
                  It can be context-level representation, word-level representation,
                  or both.
         """
+        """
         print('\n')
         print(inputs.get_shape())
         print('\n')
+        """
         #print(tf.shape(inputs)[0])
         batch_size = tf.shape(inputs)[0]
         passage_length = tf.shape(inputs)[1]
@@ -86,13 +88,17 @@ class Encoder(object):
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
                 output = tf.reshape(output,[batch_size,1,embedding_size])
+                print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
                 if word_step == 0:
                     encoded = output
                 else:
+                    print('\n~ ~ ~ ECONDED value (word_step != 0:)')
                     print(encoded)
+                    print('\n ~ ~ ~ Output value (word_step != 0:)')
                     print(output)
                     encoded = tf.concat([encoded,output],1)
+                print('\n ~ ~ ~ encoded shape' )
                 print(encoded.get_shape())
         return (encoded, h)
 
@@ -236,9 +242,9 @@ class QASystem(object):
         # h = tf.zeros(shape = [self.batch_size, self.lstm_size], dtype = tf.float32)
 
         # Encode Question Input
-        print('question size @ setup:',self.question_placeholder.get_shape())
+        # print('question size @ setup:',self.question_placeholder.get_shape())
         assert self.question_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!"
-        print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
+        # print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
         assert self.question_mask_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
         encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
@@ -249,7 +255,7 @@ class QASystem(object):
             scope = "LSTM_encode_question",
             lstm_size = self.lstm_size)
 
-        print('encoded_questions batch size @ setup:',len(encoded_questions))
+        # print('encoded_questions batch size @ setup:',len(encoded_questions))
         # print() encoded_questions[0].get_shape()[0])
         assert encoded_questions[0].get_shape()[0] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
         assert encoded_questions[0].get_shape()[1] == self.embedding_size, "Setup System: 'encoded_questions' is of the wrong shape!"

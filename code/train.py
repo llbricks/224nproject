@@ -94,13 +94,15 @@ def main(_):
     dataset = None
 
     # read training data
+
+    print('##########  READ TRAINING DATA ########## \n')
     context = open(FLAGS.data_dir + 'train.context').read().split('\n')
     question = open(FLAGS.data_dir + 'train.question').read().split('\n')
     answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
     train = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
-        train.append((question[k].split(' '),context[k].split(' '),ans_intList)) 
+        train.append((question[k].split(' '),context[k].split(' '),ans_intList))
 
     # for k in xrange(len(context)):
         # L = [map(int,question[k].split())]
@@ -109,6 +111,7 @@ def main(_):
         # train.append((L))
 
     # read test data
+    print('##########  READ TEST DATA ########## \n')
     context = open(FLAGS.data_dir + 'val.context').read().split('\n')
     question = open(FLAGS.data_dir + 'val.question').read().split('\n')
     answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
@@ -127,19 +130,23 @@ def main(_):
     dataset = (train, val)
 
     # read word embeddings
+    print('##########  READ WORD EMBEDDINGS ########## \n')
     embed_path = FLAGS.embed_path or pjoin("data", "squad", "glove.trimmed.{}.npz".format(FLAGS.embedding_size))
     # We will also load the embeddings here
     embeddings = np.load(embed_path)[FLAGS.embed_type]
 
     #read word vocabularies
+    print('##########  READ WORD VOCABULARIES ########## \n')
     vocab_path = FLAGS.vocab_path or pjoin(FLAGS.data_dir, "vocab.dat")
     vocab, rev_vocab = initialize_vocab(vocab_path)
- 
+
     # initialize encoder, decoder
+    print('##########  INITIALIZE ENCODER / DECODER ########## \n')
     encoder = Encoder(size=FLAGS.state_size, vocab_dim=FLAGS.embedding_size)
     decoder = Decoder(output_size=FLAGS.output_size)
 
     # create QA model
+    print('########## CREATE MODEL    ########## \n')
     # qa = QASystem(encoder, decoder)
     qa = QASystem(encoder, decoder, FLAGS)
 
@@ -149,12 +156,12 @@ def main(_):
     file_handler = logging.FileHandler(pjoin(FLAGS.log_dir, "log.txt"))
     logging.getLogger().addHandler(file_handler)
 
-    # save flags 
+    # save flags
     print(vars(FLAGS))
     with open(os.path.join(FLAGS.log_dir, "flags.json"), 'w') as fout:
         json.dump(FLAGS.__flags, fout)
 
-    # run training on QA model on training data 
+    # run training on QA model on training data
     with tf.Session() as sess:
         load_train_dir = get_normalized_train_dir(FLAGS.load_train_dir or FLAGS.train_dir)
         initialize_model(sess, qa, load_train_dir)
