@@ -144,7 +144,7 @@ class Decoder(object):
         h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope('SimpleDecoder'):
             #setup variables for this scope
-            softmax_w = tf.get_variable("softmax_w", 
+            softmax_w = tf.get_variable("softmax_w",
                             shape = [2*lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
             softmax_b = tf.get_variable("softmax_b", tf.zeros(n_classes), dtype = tf.float32)
@@ -154,11 +154,11 @@ class Decoder(object):
             assert tf.shape(tf.concat(question_state,[context_words[:,wordIdx],axis=1))[0] == batch_size, 'Decode_simple: input is not expected shape'
             for wordIdx in range(context_size):
                 logits = tf.matmul(tf.concat(question_state,[context_words[:,wordIdx],axis=1), softmax_w) + softmax_b)
-                # do we need to apply softmax if we're using cross_entropy soft max? 
+                # do we need to apply softmax if we're using cross_entropy soft max?
                 decoded_probability.append(tf.nn.softmax(logits))
-        assert length(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'               
-        assert tf.shape(decoded_probability[0])[0] == batch_size, 'Decode_simple: decoded is not expected shape'               
-        assert tf.shape(decoded_probability[0])[1] == n_classes, 'Decode_simple: decoded is not expected shape'               
+        assert length(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
+        assert tf.shape(decoded_probability[0])[0] == batch_size, 'Decode_simple: decoded is not expected shape'
+        assert tf.shape(decoded_probability[0])[1] == n_classes, 'Decode_simple: decoded is not expected shape'
 
         return decoded_probability
 
@@ -220,7 +220,7 @@ class QASystem(object):
 
         # Encode Question Input
         print('question batch size @ setup:',tf.shape(self.question_placeholder)[0])
-        assert tf.shape(self.question_placeholder)[1] = self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!" 
+        assert tf.shape(self.question_placeholder)[1] = self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!"
         print('question mask batch size @ setup:',tf.shape(self.question_mask_placeholder)[0])
         assert tf.shape(self.question_mask_placeholder)[1] = self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
@@ -231,7 +231,7 @@ class QASystem(object):
             lstm_size = self.lstm_size)
 
         print('encoded_questions batch size @ setup:',tf.shape(encoded_questions)[0])
-        assert tf.shape(self.encoded_questions)[1] = self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!" 
+        assert tf.shape(self.encoded_questions)[1] = self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
         print('h batch size @ setup:',tf.shape(h)[0])
         assert tf.shape(self.h)[1] = self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
@@ -249,8 +249,8 @@ class QASystem(object):
             lstm_size = self.lstm_size)
 
         print('encoded_context batch size @ setup:',tf.shape(encoded_context)[0])
-        assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!" 
-        
+        assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
+
         decoded_probability = self.decoder.decode_simple(question_state, encoded_context, self.lstm_size, self.n_classes)
 
         return decoded_probability
@@ -264,7 +264,7 @@ class QASystem(object):
             loss = tf.reduce_mean(
                    tf.boolean_mask(
                        tf.nn.sparse_softmax_cross_entropy_with_logits(pred,
-                                                                      self.labels_placeholder), 
+                                                                      self.labels_placeholder),
                               self.context_mask_placeholder))
         return loss
 
@@ -329,8 +329,12 @@ class QASystem(object):
         input_feed['valid_y'] = valid_y
 
 
-
         performance_records = {}
+
+        output_feed = [self.loss]
+        Out = session.run(output_feed, input_feed)
+        performance_records[(self.lr, self.batch_size)] = Out
+
 
         for i in range(10): # random search hyper-parameter space 10 times
             self.lr, self.batch_size = generate_random_hyperparams(1e-5, 1e-1, 5, 50)
@@ -339,7 +343,7 @@ class QASystem(object):
             performance_records[(self.lr, self.batch_size)] = Out
 
         self.lr, self.batch_size = min(performance_records, key=performance_records.get)
-        
+
         output_feed = [self.loss]
         outputs = session.run(output_feed, input_feed)
 
