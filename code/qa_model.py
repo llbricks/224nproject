@@ -34,7 +34,7 @@ class Encoder(object):
         self.size = size
         self.vocab_dim = vocab_dim
 
-    def encode(self, inputs, masks, encoder_state_input):
+    def encode(self, inputs, masks, encoder_state_input,scope,lstm_size):
         """
         In a generalized encode function, you pass in your inputs,
         masks, and an initial
@@ -49,76 +49,35 @@ class Encoder(object):
                  It can be context-level representation, word-level representation,
                  or both.
         """
-        # CONCERNS -------------------------------------------
-        # NO MASKING IMPLEMENTED YET!
-        # ALL h VALUES INITIALIZED TO ZERO FOR NOW
-        # HOW DO I USE ENCODER_STATE_INPUT?
-        # ----------------------------------------------------
+        batch_size = tf.shape(inputs)[0]
+        num_words = tf.shape(inputs)[1]  #this should be either questions_max_length or context_max_length
 
-        # Sanity Check -- I only check the first element
-        assert inputs[0][0].shape()[0] == self.batch_size, "Encoder: 'input' is of the wrong shape!"
-        assert inputs[0][0].shape()[1] == question_max_length, "Encoder: 'input' is of the wrong shape!"
-        assert inputs[0][1].shape()[0] == self.batch_size, "Encoder: 'input' is of the wrong shape!"
-        assert inputs[0][1].shape()[1] == context_max_length, "Encoder: 'input' is of the wrong shape!"
-
-        # assert inputs[0][0].shape()[1] == self.embedding_size, "Encoder: 'input' is of the wrong shape!"
-
-        lstm = tf.contrib.rnn.BasicLSTMCell(self.lstm_size)
-
+        lstm = tf.contrib.rnn.BasicLSTMCell(lstm_size)
 
         # LSTM for encoding the question
-        scope = "LSTM_encode_question"
-        question_encoded = []
-        # h_q = tf.zeros(shape = [tf.shape(inputs[0])[0], self.lstm_size], dtype = tf.float32)
-        h = tf.zeros(shape = [self.batch_size***, self.lstm_size], dtype = tf.float32)
+        encoded = []
+        h = encoder_state_input
         with tf.variable_scope(scope):
-            for time_step in range(self.question_max_length):
-                if time_step >= 1:
+            for word_step in range(num_words):
+                if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-                output, h = lstm(inputs[0][0][:,time_step],h, scope = scope)   
+                output, h = lstm(inputs[:,word_step],h, scope = scope)*masks[:,word_setup]  
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
-                question_encoded.append(output)
+                encoded.append(output)
 
 #                 # if we want different lstm_size and hidden_size, conversion layer will need to be here
 #                 # (along with initializing w and b tf.variables outside of this for loop)
 #                 #  just keep lstm_size = hidden_size for now, too complicated
 #                 logits = tf.matmul(output, W) + b
 #                 output = tf.nn.softmax(logits) # necessary? 
-
-        # Sanity Check -- I only check the first element
-        assert question_encoded.shape()[0] == self.question_max_length, "Encoder: 'question_encoded' is of the wrong shape!"
-        assert question_encoded[0].shape()[0] == self.batch_size, "Encoder: 'question_encoded' is of the wrong shape!"
-        assert question_encoded[0].shape()[1] == self.lstm_size, "Encoder: 'question_encoded' is of the wrong shape!"
-
-        # LSTM for encoding the context
-        scope = "LSTM_encode_context"
-        context_encoded = []
-        h = tf.zeros(shape = [self.batch_size***, self.lstm_size], dtype = tf.float32)
-        with tf.variable_scope(scope):
-            for time_step in range(self.context_max_length):
-                if time_step >= 1:
-                    tf.get_variable_scope().reuse_variables()
-                output, h = lstm(inputs[0][1][:,time_step],h, scope = scope)  
-                # apply dropout 
-                output = tf.nn.dropout(output, self.dropout_placeholder)
-                context_encoded.append(output)
-
-#                 # if we want different lstm_size and hidden_size, conversion layer will need to be here, as in question
-
-
-        # Sanity Check -- I only check the first element
-        assert context_encoded.shape()[0] == self.context_max_length, "Encoder: 'context_encoded' is of the wrong shape!"
-        assert context_encoded[0].shape()[0] == self.batch_size, "Encoder: 'context_encoded' is of the wrong shape!"
-        assert context_encoded[0].shape()[1] == self.lstm_size, "Encoder: 'context_encoded' is of the wrong shape!"
-
-        return ((questions_encoded,context_encoded), h)
+        return (encoded, h)
 
 class Decoder(object):
     def __init__(self, output_size):
         self.output_size = output_size
 
-    def decode(self, knowledge_rep):
+    def decode_lstm(self, knowledge_rep, scope, lstm_size, n_classes):
         """
         takes in a knowledge representation
         and output a probability estimation over
@@ -131,56 +90,67 @@ class Decoder(object):
         :return:
         """
         # CONCERNS -------------------------------------------
-        # NO MASKING IMPLEMENTED HERE -- IS THAT OK? -- I think so , that's fine. 
         # ALL h VALUES INITIALIZED TO ZERO FOR NOW
-        # HOW DO I USE ENCODER_STATE_INPUT?
-        # NOT DONE YET! HOW DO I SEPARATE THE INPUT ? (question from context)
+        # THIS JUST CONFUSES ME NOW
         # ----------------------------------------------------
-        # Sanity Check -- I only check the first element
-        assert knowledge_rep[0].shape()[0] == self.batch_size, "Decoder: 'knowledge_rep' is of the wrong shape!"
-        assert knowledge_rep[0].shape()[1] == self.question_max_length + self.context_max_length, "Decoder: 'knowledge_rep' is of the wrong shape!"
-
-        lstm = tf.contrib.rnn.BasicLSTMCell(self.lstm_size)
+        batch_size = tf.shape(knowledge_rep)[0]
+        passage_size = tf.shape(knowledge_rep)[0]
+        lstm = tf.contrib.rnn.BasicLSTMCell(lstm_size)
 
         # LSTM for decoded_start
-        scope = "LSTM_decode_start"
-        decoded_start_probability = []
-        h = tf.zeros(shape = [self.batch_size, self.lstm_size], dtype = tf.float32)
+        decoded_probability = []
+        h = tf.zeros(shape = [self.batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope(scope):
             #setup variables for this scope
             softmax_w = tf.get_variable("softmax_w", 
-                            shape = [self.lstm_size,self.n_classes],
+                            shape = [lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
             softmax_b = tf.get_variable("softmax_b", tf.zeros(self.n_classes), dtype = tf.float32)
 
             # make LSTM for this scope
-            for time_step in range(self.context_max_length):
+            for time_step in range(passage_size):
                 output, h = lstm(knowledge_rep[:,self.question_max_length +time_step], h, scope = scope)
-                logits = tf.matmul(output, softmax_w) + softmax_b
-                decoded_start_probability.append(tf.nn.softmax(logits))
+                logits = tf.matmul(output, softmax_w) + softmax_b)
+                # is it the logits we want? 
+                decoded.append(logits)
 
+        return (decoded_probability)
 
+    def decode_simple(self, knowledge_rep, scope, lstm_size,n_classes):
+        """
+        takes in a knowledge representation
+        and output a probability estimation over
+        all paragraph tokens on which token should be
+        the start of the answer span, and which should be
+        the end of the answer span.
 
-        # LSTM for decoded_end 
-        scope = "LSTM_decode_end"
-        decoded_end_probability = []
-        h = tf.zeros(shape = [self.batch_size, self.lstm_size], dtype = tf.float32)
+        :param knowledge_rep: it is a representation of the paragraph and question,
+                              decided by how you choose to implement the encoder
+        :return:
+        """
+
+        batch_size = tf.shape(knowledge_rep)[0]
+        passage_size = tf.shape(knowledge_rep)[0]
+        lstm = tf.contrib.rnn.BasicLSTMCell(self.lstm_size)
+
+        # LSTM for decoded_start
+        decoded_probability = []
+        h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope(scope):
             #setup variables for this scope
             softmax_w = tf.get_variable("softmax_w", 
-                            shape = [self.lstm_size,self.n_classes],
+                            shape = [2*lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
-            softmax_b = tf.get_variable("softmax_b", tf.zeros(self.config.n_classes), dtype = tf.float32)
+            softmax_b = tf.get_variable("softmax_b", tf.zeros(n_classes), dtype = tf.float32)
 
             # make LSTM for this scope
             for time_step in range(self.context_max_length):
-                if time_step >= 1:
-                    tf.get_variable_scope().reuse_variables()
-                output, h = lstm(knowledge_rep[:,self.question_max_length + time_step], h, scope = scope)
-                logits = tf.matmul(output, softmax_w) + softmax_b
-                decoded_end_probability.append(tf.nn.softmax(logits))
+                output, h = lstm(knowledge_rep[:,self.question_max_length +time_step], h, scope = scope)
+                logits = tf.matmul(output, softmax_w) + softmax_b)
+                decoded_start_probability.append(tf.nn.softmax(logits))
 
-        return (decoded_start_probability,decoded_end_probability)
+        return (decoded_probability)
+
 
 class QASystem(object):
     # def __init__(self, encoder, decoder, *args):
@@ -206,8 +176,16 @@ class QASystem(object):
         self.n_epochs = FLAGS.epochs
         self.report = None
         # ==== set up placeholder tokens ========
+        self.encoder = encoder
+        self.decoder = decoder
+        self.question_placeholder = tf.placeholder(tf.int32,(None,self.question_max_length))
+        self.context_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
+        self.labels_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
+        self.labels_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
+        self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
+        self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
 
-
+        self.dropout_placeholder = tf.placeholder(tf.float32)
         # ==== assemble pieces ====
         with tf.variable_scope("qa", initializer=tf.uniform_unit_scaling_initializer(1.0)):
             self.setup_embeddings()
@@ -225,15 +203,41 @@ class QASystem(object):
         to assemble your reading comprehension system!
         :EncoderQ:
         """
-        # return = Encoder(
-            # tf.contrib.rnn.BasicLSTMCell(self.lstm_size)
-        # lstm_encodec = tf.contrib.rnn.BasicLSTMCell(self.lstm_size)
-        
-        # encoded_q = Encoder.encode(self.question_placeholder)
-        # encoded_c = Encoder.encode(self.context_placeholder)
+        # should we initialize this as zeros?? 
+        h = tf.zeros(shape = [tf.shape(self.question_placeholder)[0], self.lstm_size], dtype = tf.float32)
 
-        out = lstm_homie_whatshisface([encoded_q + encoded_c])
-        decoded = lstm_homie_whatshisface(out)
+        # Encode Question Input
+        print('question batch size @ setup:',tf.shape(self.question_placeholder)[0])
+        assert tf.shape(self.question_placeholder)[1] = self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!" 
+        print('question mask batch size @ setup:',tf.shape(self.question_mask_placeholder)[0])
+        assert tf.shape(self.question_mask_placeholder)[1] = self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
+
+        encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
+            masks = self.question_mask_placeholder,
+            encoder_state_input = h,
+            scope = "LSTM_encode_question",
+            lstm_size = self.lstm_size)
+
+        print('encoded_questions batch size @ setup:',tf.shape(encoded_questions)[0])
+        assert tf.shape(self.encoded_questions)[1] = self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!" 
+        print('h batch size @ setup:',tf.shape(h)[0])
+        assert tf.shape(self.h)[1] = self.lstm_size, "Setup System: 'h' is of the wrong shape!"
+
+        # Encode Context Input
+        print('context batch size @ setup:',tf.shape(self.context_placeholder)[0])
+        assert tf.shape(self.context_placeholder)[1] = self.context_max_length, "Setup System: 'context_placeholder' is of the wrong shape!"
+        print('context mask batch size @ setup:',tf.shape(self.context_mask_placeholder)[0])
+        assert tf.shape(self.context_mask_placeholder)[1] = self.context_max_length, "Setup System: 'context_mask_placeholder' is of the wrong shape!"
+
+        encoded_context, h = Encoder.encode(inputs = self.context_placeholder,
+            masks = self.context_mask_placeholder,
+            encoder_state_input = q,
+            scope = "LSTM_encode_context",
+            lstm_size = self.lstm_size)
+
+        print('encoded_context batch size @ setup:',tf.shape(encoded_context)[0])
+        assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!" 
+
 
         raise NotImplementedError("Connect all parts of your system here!")
 
