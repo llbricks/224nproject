@@ -91,15 +91,28 @@ def main(_):
 
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
-    ids_context = open(FLAGS.data_dir + 'train.context').read().split('\n')
-    ids_question = open(FLAGS.data_dir + 'train.question').read().split('\n')
-    ids_answer = open(FLAGS.data_dir + 'train.span').read().split('\n')
-    dataset = []
+
+    context = open(FLAGS.data_dir + 'train.context').read().split('\n')
+    question = open(FLAGS.data_dir + 'train.question').read().split('\n')
+    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
+    train = []
     for k in xrange(len(ids_context)):
         L = [map(int,ids_question[k].split())]
         L.append(map(int, ids_context[k].split()))
         L.append(map(int, ids_answer[k].split()))
-        dataset.append((L))
+        train.append((L))
+
+    context = open(FLAGS.data_dir + 'val.context').read().split('\n')
+    question = open(FLAGS.data_dir + 'val.question').read().split('\n')
+    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
+    val = []
+    for k in xrange(len(ids_context)):
+        L = [map(int,ids_question[k].split())]
+        L.append(map(int, ids_context[k].split()))
+        L.append(map(int, ids_answer[k].split()))
+        val.append((L))
+
+    dataset = (train, val)
 
     embed_path = FLAGS.embed_path or pjoin("data", "squad", "glove.trimmed.{}.npz".format(FLAGS.embedding_size))
     # We will also load the embeddings here
@@ -132,7 +145,7 @@ def main(_):
         qa.train(sess, dataset, embeddings, vocab, save_train_dir)
 
         # qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
-        qa.evaluate_answer(sess, dataset, rev_vocab, FLAGS.evaluate, log=True)
+        qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
 
 if __name__ == "__main__":
     tf.app.run()
