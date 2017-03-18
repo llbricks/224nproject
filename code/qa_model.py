@@ -17,7 +17,12 @@ from data_util import get_word2embed_dict, preprocess_sequence_data
 
 logging.basicConfig(level=logging.INFO)
 
-
+def generate_random_hyperparams(lr_min, lr_max, batch_min, batch_max):
+    '''generate random learning rate and batch size'''
+    # random search through log space for learning rate
+    random_learning_rate = 10**np.random.uniform(lr_min, lr_max)
+    random_batch_size = np.random.uniform(batch_min, batch_max)
+    return random_learning_rate, random_batch_size
 
 def get_optimizer(opt):
     if opt == "adam":
@@ -61,7 +66,7 @@ class Encoder(object):
             for word_step in range(num_words):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-                output, h = lstm(inputs[:,word_step],h, scope = scope)*masks[:,word_setup]  
+                output, h = lstm(inputs[:,word_step],h, scope = scope)*masks[:,word_setup]
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
                 encoded.append(output)
@@ -70,7 +75,7 @@ class Encoder(object):
 #                 # (along with initializing w and b tf.variables outside of this for loop)
 #                 #  just keep lstm_size = hidden_size for now, too complicated
 #                 logits = tf.matmul(output, W) + b
-#                 output = tf.nn.softmax(logits) # necessary? 
+#                 output = tf.nn.softmax(logits) # necessary?
         return (encoded, h)
 
 class Decoder(object):
@@ -102,7 +107,7 @@ class Decoder(object):
         h = tf.zeros(shape = [self.batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope(scope):
             #setup variables for this scope
-            softmax_w = tf.get_variable("softmax_w", 
+            softmax_w = tf.get_variable("softmax_w",
                             shape = [lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
             softmax_b = tf.get_variable("softmax_b", tf.zeros(self.n_classes), dtype = tf.float32)
@@ -111,7 +116,7 @@ class Decoder(object):
             for time_step in range(passage_size):
                 output, h = lstm(knowledge_rep[:,self.question_max_length +time_step], h, scope = scope)
                 logits = tf.matmul(output, softmax_w) + softmax_b)
-                # is it the logits we want? 
+                # is it the logits we want?
                 decoded.append(logits)
 
         return (decoded_probability)
@@ -138,7 +143,7 @@ class Decoder(object):
         h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope(scope):
             #setup variables for this scope
-            softmax_w = tf.get_variable("softmax_w", 
+            softmax_w = tf.get_variable("softmax_w",
                             shape = [2*lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
             softmax_b = tf.get_variable("softmax_b", tf.zeros(n_classes), dtype = tf.float32)
@@ -203,12 +208,12 @@ class QASystem(object):
         to assemble your reading comprehension system!
         :EncoderQ:
         """
-        # should we initialize this as zeros?? 
+        # should we initialize this as zeros??
         h = tf.zeros(shape = [tf.shape(self.question_placeholder)[0], self.lstm_size], dtype = tf.float32)
 
         # Encode Question Input
         print('question batch size @ setup:',tf.shape(self.question_placeholder)[0])
-        assert tf.shape(self.question_placeholder)[1] = self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!" 
+        assert tf.shape(self.question_placeholder)[1] = self.question_max_length, "Setup System: 'question_placeholder' is of the wrong shape!"
         print('question mask batch size @ setup:',tf.shape(self.question_mask_placeholder)[0])
         assert tf.shape(self.question_mask_placeholder)[1] = self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
@@ -219,7 +224,7 @@ class QASystem(object):
             lstm_size = self.lstm_size)
 
         print('encoded_questions batch size @ setup:',tf.shape(encoded_questions)[0])
-        assert tf.shape(self.encoded_questions)[1] = self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!" 
+        assert tf.shape(self.encoded_questions)[1] = self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
         print('h batch size @ setup:',tf.shape(h)[0])
         assert tf.shape(self.h)[1] = self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
@@ -236,7 +241,7 @@ class QASystem(object):
             lstm_size = self.lstm_size)
 
         print('encoded_context batch size @ setup:',tf.shape(encoded_context)[0])
-        assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!" 
+        assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
 
 
         raise NotImplementedError("Connect all parts of your system here!")
@@ -296,6 +301,14 @@ class QASystem(object):
         input_feed['valid_y'] = valid_y
 
         output_feed = [self.loss]
+
+        performance_records = {}
+
+        for i in range(10): # random search hyper-parameter space 10 times
+            self.lr, self.batch_size = generate_random_hyperparams(1e-5, 1e-1, 5, 50)
+            output_feed = [self.loss]
+            Out = session.run(output_feed, input_feed)
+            performance_records[(self.lr, self.batch_size)] = Out
 
         outputs = session.run(output_feed, input_feed)
 
@@ -364,7 +377,7 @@ class QASystem(object):
         :param sample: how many examples in dataset we look at
         :param log: whether we print to std out stream
         :return:
-        """ 
+        """
         f1 = 0
         em = 0
         total = 0
@@ -421,7 +434,7 @@ class QASystem(object):
 
         best_score = 0.
         for epoch in range(self.n_epochs):
-            
+
             logger.info("Epoch %d out of %d", epoch + 1, self.config.n_epochs)
             prog = Progbar(target=1 + int(len(train_examples) / self.batch_size))
 
@@ -457,11 +470,3 @@ class QASystem(object):
         num_params = sum(map(lambda t: np.prod(tf.shape(t.value()).eval()), params))
         toc = time.time()
         logging.info("Number of params: %d (retreival took %f secs)" % (num_params, toc - tic))
-
-
-
-
-
-
-
-
