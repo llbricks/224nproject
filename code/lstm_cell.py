@@ -12,7 +12,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.ops.gen_math_ops import _batch_mat_mul as batch_matmul
 
-# What's the logger? 
+# What's the logger?
 # logger = logging.getLogger("hw3.q3.1")
 # logger.setLevel(logging.DEBUG)
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -22,7 +22,8 @@ class LSTMCell(tf.nn.rnn_cell.RNNCell):
     nicely with TensorFlow.
     """
     def __init__(self, lstm_size):
-        self.state_size = lstm_size
+        print(lstm_size)
+        self._state_size = lstm_size
 
     def __call__(self, inputs, state, scope=None):
 
@@ -68,4 +69,3 @@ class LSTMCell(tf.nn.rnn_cell.RNNCell):
         # assignment)
         output = new_state
         return h_t, new_state
-
