@@ -116,7 +116,7 @@ class Decoder(object):
             # make LSTM for this scope
             for time_step in range(passage_size):
                 output, h = lstm(knowledge_rep[:,self.question_max_length +time_step], h, scope = scope)
-                logits = tf.matmul(output, softmax_w) + softmax_b)
+                logits = tf.matmul(output, softmax_w) + softmax_b
                 # is it the logits we want?
                 decoded.append(logits)
 
@@ -150,10 +150,10 @@ class Decoder(object):
             softmax_b = tf.get_variable("softmax_b", tf.zeros(n_classes), dtype = tf.float32)
 
             # make predictions for each word
-            assert tf.shape(tf.concat(question_state,[context_words[:,wordIdx],axis=1))[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-            assert tf.shape(tf.concat(question_state,[context_words[:,wordIdx],axis=1))[0] == batch_size, 'Decode_simple: input is not expected shape'
+            assert tf.shape(tf.concat(question_state,context_words[:,wordIdx],axis=1))[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+            assert tf.shape(tf.concat(question_state,context_words[:,wordIdx],axis=1))[0] == batch_size, 'Decode_simple: input is not expected shape'
             for wordIdx in range(context_size):
-                logits = tf.matmul(tf.concat(question_state,[context_words[:,wordIdx],axis=1), softmax_w) + softmax_b)
+                logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
                 # do we need to apply softmax if we're using cross_entropy soft max?
                 decoded_probability.append(tf.nn.softmax(logits))
         assert length(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
@@ -291,22 +291,64 @@ class QASystem(object):
         with vs.variable_scope("embeddings"):
             pass
 
+    def create_feed_dict(self, question_batch, context_batch, question_mask_batch, context_mask_batch, labels_batch=None, dropout=1):
+        """Creates the feed_dict for the dependency parser.
+
+        A feed_dict takes the form of:
+
+        feed_dict = {
+                <placeholder>: <tensor of values to be passed for placeholder>,
+                ....
+        }
+
+        Hint: The keys for the feed_dict should be a subset of the placeholder
+                    tensors created in add_placeholders.
+        Hint: When an argument is None, don't add it to the feed_dict.
+
+        Args:
+            inputs_batch: A batch of input data.
+            mask_batch:   A batch of mask data.
+            labels_batch: A batch of label data.
+            dropout: The dropout rate.
+        Returns:
+            feed_dict: The feed dictionary mapping from placeholders to values.
+        """
+        ### YOUR CODE (~6-10 lines)
+        feed_dict = {}
+
+        if question_batch is not None:
+            input_feed[self.question_placeholder] = question_batch
+        
+        if context_batch is not None:
+            input_feed[self.context_placeholder] = context_batch
+        
+        if answer_batch is not None:
+            input_feed[self.labels_placeholder] = answer_batch
+        
+        if question_mask_batch is not None:
+            input_feed[self.question_mask_placeholder] = question_mask_batch
+        
+        if context_mask_batch is not None:
+            input_feed[self.context_mask_placeholder] = context_mask_batch
+        
+        feed_dict[self.dropout_placeholder] = dropout
+        ### END YOUR CODE
+        return feed_dict
+
     def optimize(self, session, question_batch, context_batch, answer_batch, question_mask_batch, context_mask_batch):
         """
         Takes in actual data to optimize your model
         This method is equivalent to a step() function
         :return:
         """
-        input_feed = {}
+        input_feed = create_feed_dict(question_batch = question_batch, 
+                                      context_batch = context_batch, 
+                                      question_mask_batch = question_mask_batch, 
+                                      context_mask_batch = context_mask_batch, 
+                                      labels_batch = labels_batch)
 
         # fill in this feed_dictionary like:
         # input_feed['train_x'] = train_x
-
-        input_feed[self.question_placeholder] = question_batch
-        input_feed[self.context_placeholder] = context_batch
-        input_feed[self.labels_placeholder] = answer_batch
-        input_feed[self.question_mask_placeholder] = question_mask_batch
-        input_feed[self.context_mask_placeholder] = context_mask_batch
 
         output_feed = [self.train_op, self.loss]
 
@@ -349,18 +391,19 @@ class QASystem(object):
 
         return outputs
 
-    def decode(self, session, test_x):
+    def decode(self, session, question_batch, context_batch, question_mask_batch, context_mask_batch):
         """
         Returns the probability distribution over different positions in the paragraph
         so that other methods like self.answer() will be able to work properly
         :return:
         """
-        input_feed = {}
+        input_feed = create_feed_dict(question_batch = question_batch, 
+                                      context_batch = context_batch, 
+                                      question_mask_batch = question_mask_batch, 
+                                      context_mask_batch = context_mask_batch)
 
         # fill in this feed_dictionary like:
         # input_feed['test_x'] = test_x
-
-        input_feed['test_x'] = test_x
 
         output_feed = [self.setup_system]
 
@@ -370,7 +413,7 @@ class QASystem(object):
 
     def answer(self, session, test_x):
 
-        yp, yp2 = self.decode(session, test_x)
+        yp, yp2 = self.decode(session, *test_x)
 
         a_s = np.argmax(yp, axis=1)
         a_e = np.argmax(yp2, axis=1)
@@ -418,10 +461,10 @@ class QASystem(object):
         total = 0
         data_len = len(dataset)
         for i in np.random.randint(data_len, size = sample):
-            (question_id, context_id, span) = dataset[i]
-            (a_s, a_e) = self.answer(session, (question_id, context_id))
-            prediction = ' '.join([vocab[context_id[idx]] for idx in range(a_s, a_e + 1)])
-            ground_truth = ' '.join([vocab[context_id[idx]] for idx in range(span[0], span[1] + 1)])
+            (question, context, span, question_mask, context_mask) = dataset[i]
+            (a_s, a_e) = self.answer(session, (question, context, question_mask, context_mask))
+            prediction = ' '.join([vocab[context[idx]] for idx in range(a_s, a_e + 1)])
+            ground_truth = ' '.join([vocab[context[idx]] for idx in range(span[0], span[1] + 1)])
             total += 1
             em += exact_match_score(prediction, ground_truth)
             f1 += f1_score(prediction, ground_truth)
@@ -462,10 +505,12 @@ class QASystem(object):
         :param train_dir: path to the directory where you should save the model checkpoint
         :return:
         """
+        (train, validation) = dataset
+
         embed_dict = get_word2embed_dict(embeddings, vocab)
 
-        train_examples = preprocess_sequence_data(dataset, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
-        validation_examples = preprocess_sequence_data()
+        train_examples = preprocess_sequence_data(train, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
+        validation_examples = preprocess_sequence_data(validation, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
 
         best_score = 0.
         for epoch in range(self.n_epochs):
@@ -482,7 +527,7 @@ class QASystem(object):
             print("")
 
             logger.info("Evaluating on development data")
-            f1, em = self.evaluate_answer(session, dev_set, dev_set_raw)
+            f1, em = self.evaluate_answer(session, validation_examples, vocab)
 
             if f1 > best_score:
                 best_score = f1

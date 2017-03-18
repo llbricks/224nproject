@@ -96,20 +96,20 @@ def main(_):
     question = open(FLAGS.data_dir + 'train.question').read().split('\n')
     answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
     train = []
-    for k in xrange(len(ids_context)):
-        L = [map(int,ids_question[k].split())]
-        L.append(map(int, ids_context[k].split()))
-        L.append(map(int, ids_answer[k].split()))
+    for k in xrange(len(context)):
+        L = [map(int,question[k].split())]
+        L.append(map(int, context[k].split()))
+        L.append(map(int, answer_span[k].split()))
         train.append((L))
 
     context = open(FLAGS.data_dir + 'val.context').read().split('\n')
     question = open(FLAGS.data_dir + 'val.question').read().split('\n')
     answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
     val = []
-    for k in xrange(len(ids_context)):
-        L = [map(int,ids_question[k].split())]
-        L.append(map(int, ids_context[k].split()))
-        L.append(map(int, ids_answer[k].split()))
+    for k in xrange(len(context)):
+        L = [map(int,question[k].split())]
+        L.append(map(int, context[k].split()))
+        L.append(map(int, answer_span[k].split()))
         val.append((L))
 
     dataset = (train, val)
