@@ -82,7 +82,10 @@ class Encoder(object):
                 print(h.get_shape())
                 print('\n inputs[:,word_step] Shape')
                 print(inputs[:,word_step].get_shape())
+                hidden_mask = tf.tile(masks[:,word_step], [1, lstm_size])
                 output, h = lstm(inputs[:,word_step],h, scope = scope )#*masks[:,word_step]
+                print('output shape:',output.get_shape())
+                print('mask shape:' , hidden_mask.get_shape())
                 output = output*masks[:,word_step]
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
@@ -204,7 +207,7 @@ class QASystem(object):
         self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length,self.embedding_size))
         self.labels_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length))
         self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
-        self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
+        self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.context_max_length))
 
         self.dropout_placeholder = tf.placeholder(tf.float32)
         # ==== assemble pieces ====
