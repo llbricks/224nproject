@@ -41,7 +41,7 @@ class Encoder(object):
         self.size = size
         self.vocab_dim = vocab_dim
 
-    def encode(self, inputs, masks, scope, lstm_size, encoder_state_input = None):
+    def encode(self, inputs , masks, scope, lstm_size, encoder_state_input = None):
         """
         In a generalized encode function, you pass in your inputs,
         masks, and an initial
@@ -56,18 +56,24 @@ class Encoder(object):
                  It can be context-level representation, word-level representation,
                  or both.
         """
-        print(tf.shape(inputs)[0])
+        print('\n')
+        print(inputs.get_shape())
+        print('\n')
+        #print(tf.shape(inputs)[0])
         batch_size = tf.shape(inputs)[0]
         num_words = inputs.get_shape()[1]  #this should be either questions_max_length or context_max_length
 
-        lstm = tf.nn.rnn_cell.BasicLSTMCell(lstm_size, state_is_tuple = False)
+        lstm = tf.nn.rnn_cell.BasicLSTMCell(num_units= lstm_size, state_is_tuple = False)
+
 
         # LSTM for encoding the question
         encoded = []
-        print(lstm_size)
         h = encoder_state_input or tf.zeros([batch_size, lstm_size])
         with tf.variable_scope(scope):
             for word_step in range(num_words):
+                print('\n Inputs Shape')
+                print(inputs.get_shape())
+                print('\n')
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
                 print(h.get_shape())
@@ -225,6 +231,7 @@ class QASystem(object):
         print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
         assert self.question_mask_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
+
         encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
             masks = self.question_mask_placeholder,
             # encoder_state_input = h,
@@ -321,19 +328,19 @@ class QASystem(object):
 
         if question_batch is not None:
             input_feed[self.question_placeholder] = question_batch
-        
+
         if context_batch is not None:
             input_feed[self.context_placeholder] = context_batch
-        
+
         if answer_batch is not None:
             input_feed[self.labels_placeholder] = answer_batch
-        
+
         if question_mask_batch is not None:
             input_feed[self.question_mask_placeholder] = question_mask_batch
-        
+
         if context_mask_batch is not None:
             input_feed[self.context_mask_placeholder] = context_mask_batch
-        
+
         input_feed[self.dropout_placeholder] = dropout
         # feed_dict[self.dropout_placeholder] = dropout
         ### END YOUR CODE
@@ -345,10 +352,10 @@ class QASystem(object):
         This method is equivalent to a step() function
         :return:
         """
-        input_feed = create_feed_dict(question_batch = question_batch, 
-                                      context_batch = context_batch, 
-                                      question_mask_batch = question_mask_batch, 
-                                      context_mask_batch = context_mask_batch, 
+        input_feed = create_feed_dict(question_batch = question_batch,
+                                      context_batch = context_batch,
+                                      question_mask_batch = question_mask_batch,
+                                      context_mask_batch = context_mask_batch,
                                       labels_batch = labels_batch,
                                       dropout = self.dropout)
 
@@ -402,9 +409,9 @@ class QASystem(object):
         so that other methods like self.answer() will be able to work properly
         :return:
         """
-        input_feed = create_feed_dict(question_batch = question_batch, 
-                                      context_batch = context_batch, 
-                                      question_mask_batch = question_mask_batch, 
+        input_feed = create_feed_dict(question_batch = question_batch,
+                                      context_batch = context_batch,
+                                      question_mask_batch = question_mask_batch,
                                       context_mask_batch = context_mask_batch)
 
         # fill in this feed_dictionary like:
