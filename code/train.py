@@ -33,7 +33,10 @@ tf.app.flags.DEFINE_integer("print_every", 1, "How many iterations to do per pri
 tf.app.flags.DEFINE_integer("keep", 0, "How many checkpoints to keep, 0 indicates keep all.")
 tf.app.flags.DEFINE_string("vocab_path", "data/squad/vocab.dat", "Path to vocab file (default: ./data/squad/vocab.dat)")
 tf.app.flags.DEFINE_string("embed_path", "", "Path to the trimmed GLoVe embedding (default: ./data/squad/glove.trimmed.{embedding_size}.npz)")
+# user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
+tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
+tf.app.flags.DEFINE_string("n_classes", 2, "Number of output classes (default: 2)")
 
 FLAGS = tf.app.flags.FLAGS
 
@@ -108,7 +111,8 @@ def main(_):
     encoder = Encoder(size=FLAGS.state_size, vocab_dim=FLAGS.embedding_size)
     decoder = Decoder(output_size=FLAGS.output_size)
 
-    qa = QASystem(encoder, decoder)
+    # qa = QASystem(encoder, decoder)
+    qa = QASystem(encoder, decoder, FLAGS)
 
     if not os.path.exists(FLAGS.log_dir):
         os.makedirs(FLAGS.log_dir)
