@@ -17,13 +17,13 @@ from tensorflow.python.ops.gen_math_ops import _batch_mat_mul as batch_matmul
 # logger.setLevel(logging.DEBUG)
 # logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
-class LSTMCell(tf.nn.rnn_cell.RNNCell):
+class LSTMCell():
     """Wrapper around our GRU cell implementation that allows us to play
     nicely with TensorFlow.
     """
     def __init__(self, lstm_size):
         print(lstm_size)
-        self._state_size = lstm_size
+        self.state_size = lstm_size
 
     def __call__(self, inputs, state, scope=None):
 
