@@ -82,7 +82,8 @@ class Encoder(object):
                 print(h.get_shape())
                 print('\n inputs[:,word_step] Shape')
                 print(inputs[:,word_step].get_shape())
-                hidden_mask = tf.tile(masks[:,word_step], [lstm_size])
+                print('mask shape:' , masks[:,word_step].get_shape())
+                hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,lstm_size])
                 output, h = lstm(inputs[:,word_step],h, scope = scope )#*masks[:,word_step]
                 print('output shape:',output.get_shape())
                 print('mask shape:' , hidden_mask.get_shape())
