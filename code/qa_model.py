@@ -28,6 +28,16 @@ def get_optimizer(opt):
         assert (False)
     return optfn
 
+<<<<<<< Updated upstream
+=======
+def generate_random_hyperparams(lr_min, lr_max, batch_min, batch_max):
+    '''generate random learning rate and batch size'''
+    # random search through log space for learning rate
+    random_learning_rate = 10**np.random.uniform(lr_min, lr_max)
+    random_batch_size = np.random.uniform(batch_min, batch_max)
+    return random_learning_rate, random_batch_size
+
+>>>>>>> Stashed changes
 
 class Encoder(object):
     def __init__(self, size, vocab_dim):
@@ -295,7 +305,17 @@ class QASystem(object):
         input_feed['valid_x'] = valid_x
         input_feed['valid_y'] = valid_y
 
+<<<<<<< Updated upstream
         output_feed = [self.loss]
+=======
+        performance_records = {}
+
+        for i in range(10): # random search hyper-parameter space 10 times
+            random_learning_rate, random_batch_size = generate_random_hyperparams(1e-5, 1e-1, 5, 50)
+            output_feed = [self.loss]
+            Out = session.run(output_feed, input_feed)
+            performance_records[(self.lr, self.batch_size)] = Out
+>>>>>>> Stashed changes
 
         outputs = session.run(output_feed, input_feed)
 
