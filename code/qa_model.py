@@ -43,7 +43,7 @@ class Encoder(object):
         self.size = size
         self.vocab_dim = vocab_dim
 
-    def encode(self, inputs , masks, scope, lstm_size, encoder_state_input = None):
+    def encode(self, inputs , masks, dropout, scope, lstm_size, encoder_state_input = None):
         """
         In a generalized encode function, you pass in your inputs,
         masks, and an initial
@@ -79,7 +79,7 @@ class Encoder(object):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
                 print('\n h Shape')
-                print(h.get_shape())
+                # print(h.get_shape())
                 print('\n inputs[:,word_step] Shape')
                 print(inputs[:,word_step].get_shape())
                 print('mask shape:' , masks[:,word_step].get_shape())
@@ -89,7 +89,7 @@ class Encoder(object):
                 print('mask shape:' , hidden_mask.get_shape())
                 output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
                 # apply dropout
-                output = tf.nn.dropout(output, self.dropout_placeholder)
+                output = tf.nn.dropout(output, dropout)
                 encoded.append(output)
         return (encoded, h)
 
@@ -243,6 +243,7 @@ class QASystem(object):
 
         encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
             masks = self.question_mask_placeholder,
+            dropout = self.dropout_placeholder,
             # encoder_state_input = h,
             encoder_state_input = None,
             scope = "LSTM_encode_question",
