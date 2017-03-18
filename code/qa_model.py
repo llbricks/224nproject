@@ -87,8 +87,13 @@ class Encoder(object):
                 print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
                 print('\n ~ ~ ~ Hidden mask' )
-                print(hidden_mask[:,word_step])
+                print(hidden_mask)
+                print('\n ~ ~ ~  word_step' )
+                print(word_step)
+                print(word_step)
+
                 output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
+
                 # apply dropout
                 print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
@@ -104,8 +109,8 @@ class Encoder(object):
                 #    print('\n ~ ~ ~ Output value (word_step != 0:)')
                 #    print(output)
                     encoded = tf.concat_v2([encoded,output],1)
-                print('\n ~ ~ ~ encoded shape' )
-                print(encoded.get_shape())
+                # print('\n ~ ~ ~ encoded shape' )
+                # print(encoded.get_shape())
         return (encoded, h, state)
 
 class Decoder(object):
