@@ -71,8 +71,8 @@ class Encoder(object):
         h = encoder_state_input or tf.zeros([batch_size, lstm_size])
         with tf.variable_scope(scope):
             for word_step in range(num_words):
-                print('\n Inputs Shape')
-                print(inputs.get_shape())
+                print('\n Inputs[:][0] Shape')
+                print(inputs[:][0].get_shape())
                 print('\n')
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
@@ -80,7 +80,7 @@ class Encoder(object):
                 print(h.get_shape())
                 print('\n inputs[:,word_step] Shape')
                 print(inputs[:,word_step].get_shape())
-                output, h = lstm(inputs,h, scope = scope ) *masks[:,word_setup]
+                output, h = lstm(inputs[:,word_step],h, scope = scope )*masks[:,word_setup]
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
                 encoded.append(output)
@@ -104,7 +104,7 @@ class Decoder(object):
         """
         # CONCERNS -------------------------------------------
         # ALL h VALUES INITIALIZED TO ZERO FOR NOW
-        # THIS JUST CONFUSES ME NOW
+        # THIS JUST CONFUSES ME NOW, don't use this function, use the one after
         # ----------------------------------------------------
         batch_size = tf.shape(knowledge_rep)[0]
         passage_size = knowledge_rep.get_shape()[0]
@@ -197,8 +197,8 @@ class QASystem(object):
         # ==== set up placeholder tokens ========
         self.encoder = encoder
         self.decoder = decoder
-        self.question_placeholder = tf.placeholder(tf.float32,(None,self.question_max_length))
-        self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length))
+        self.question_placeholder = tf.placeholder(tf.float32,(None,self.question_max_length,self.embedding_size))
+        self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length,self.embedding_size))
         self.labels_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length))
         self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
         self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
@@ -354,6 +354,7 @@ class QASystem(object):
         This method is equivalent to a step() function
         :return:
         """
+
         input_feed = create_feed_dict(question_batch = question_batch,
                                       context_batch = context_batch,
                                       question_mask_batch = question_mask_batch,
@@ -533,7 +534,6 @@ class QASystem(object):
             prog = Progbar(target=1 + int(len(train_examples) / self.batch_size))
 
             for i, batch in enumerate(minibatches(train_examples, self.batch_size)):
-
                 _, loss = self.optimize(session,*batch)
 
                 prog.update(i + 1, [("train loss", loss)])
