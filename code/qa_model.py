@@ -76,9 +76,11 @@ class Encoder(object):
                 print('\n')
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
+                print('\n h Shape')
                 print(h.get_shape())
+                print('\n inputs[:,word_step] Shape')
                 print(inputs[:,word_step].get_shape())
-                output, h = lstm(inputs[:,word_step],h, scope = scope ) *masks[:,word_setup]
+                output, h = lstm(inputs,h, scope = scope ) *masks[:,word_setup]
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
                 encoded.append(output)
@@ -195,9 +197,9 @@ class QASystem(object):
         # ==== set up placeholder tokens ========
         self.encoder = encoder
         self.decoder = decoder
-        self.question_placeholder = tf.placeholder(tf.int32,(None,self.question_max_length))
-        self.context_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
-        self.labels_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
+        self.question_placeholder = tf.placeholder(tf.float32,(None,self.question_max_length))
+        self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length))
+        self.labels_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length))
         self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
         self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
 
