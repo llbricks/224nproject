@@ -300,7 +300,7 @@ class QASystem(object):
         input_feed['valid_x'] = valid_x
         input_feed['valid_y'] = valid_y
 
-        output_feed = [self.loss]
+
 
         performance_records = {}
 
@@ -310,6 +310,9 @@ class QASystem(object):
             Out = session.run(output_feed, input_feed)
             performance_records[(self.lr, self.batch_size)] = Out
 
+        self.lr, self.batch_size = min(performance_records, key=performance_records.get)
+        
+        output_feed = [self.loss]
         outputs = session.run(output_feed, input_feed)
 
         return outputs
