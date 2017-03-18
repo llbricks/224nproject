@@ -84,23 +84,29 @@ class Encoder(object):
                     tf.get_variable_scope().reuse_variables()
                 hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,lstm_size])
                 output, h = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
-                output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
-                # apply dropout
-                output = tf.nn.dropout(output, dropout)
-                output = tf.reshape(output,[batch_size,1,embedding_size])
                 print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
+                print('\n ~ ~ ~ Hidden mask' )
+                print(hidden_mask[:,word_step])
+                output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
+                # apply dropout
+                print('\n ~ ~ ~ Output shape' )
+                print(output.get_shape())
+                output = tf.nn.dropout(output, dropout)
+                output = tf.reshape(output,[batch_size,1,embedding_size])
+                #print('\n ~ ~ ~ Output shape' )
+                #print(output.get_shape())
                 if word_step == 0:
                     encoded = output
                 else:
-                    print('\n ~ ~ ~ ECONDED value (word_step != 0:)')
-                    print(encoded)
-                    print('\n ~ ~ ~ Output value (word_step != 0:)')
-                    print(output)
+                #    print('\n ~ ~ ~ ECONDED value (word_step != 0:)')
+                #    print(encoded)
+                #    print('\n ~ ~ ~ Output value (word_step != 0:)')
+                #    print(output)
                     encoded = tf.concat_v2([encoded,output],1)
                 print('\n ~ ~ ~ encoded shape' )
                 print(encoded.get_shape())
-        return (encoded, h)
+        return (encoded, h, state)
 
 class Decoder(object):
     def __init__(self, output_size):
@@ -247,7 +253,7 @@ class QASystem(object):
         # print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
         assert self.question_mask_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
-        encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
+        encoded_questions, q, state = self.encoder.encode(inputs = self.question_placeholder,
             masks = self.question_mask_placeholder,
             dropout = self.dropout_placeholder,
             # encoder_state_input = h,
@@ -268,9 +274,18 @@ class QASystem(object):
         print('context mask batch size @ setup:',self.context_mask_placeholder.get_shape()[0])
         assert self.context_mask_placeholder.get_shape()[1] == self.context_max_length, "Setup System: 'context_mask_placeholder' is of the wrong shape!"
 
-        h = tf.zeros(shape = [self.context_placeholder.get_shape()[0], self.lstm_size], dtype = tf.float32)
-        encoded_context, h = self.encoder.encode(inputs = self.context_placeholder,
+        """print('\n self.context_placeholder.get_shape()[0]')
+        print(self.context_placeholder.get_shape()[0])
+        print('\n')
+
+        #new_shape = self.context_placeholder.get_shape()[0]
+        #h = tf.zeros(shape = [new_shape, self.lstm_size], dtype = tf.float32)"""
+
+
+
+        encoded_context, h, state = self.encoder.encode(inputs = self.context_placeholder,
             masks = self.context_mask_placeholder,
+            dropout = self.dropout_placeholder,
             encoder_state_input = q,
             scope = "LSTM_encode_context",
             lstm_size = self.lstm_size)
