@@ -91,9 +91,9 @@ def main(_):
 
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
-    ids_context = open(FLAGS.data_dir + FLAGS.train_dir + '.ids.context').read().split('\n')
-    ids_question = open(FLAGS.data_dir + FLAGS.train_dir + '.ids.question').read().split('\n')
-    ids_answer = open(FLAGS.data_dir + FLAGS.train_dir + '.span').read().split('\n')
+    ids_context = open(FLAGS.data_dir + 'train.context').read().split('\n')
+    ids_question = open(FLAGS.data_dir + 'train.question').read().split('\n')
+    ids_answer = open(FLAGS.data_dir + 'train.span').read().split('\n')
     dataset = []
     for k in xrange(len(ids_context)):
         L = [map(int,ids_question[k].split())]
