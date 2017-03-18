@@ -192,16 +192,15 @@ class QASystem(object):
         self.question_placeholder = tf.placeholder(tf.int32,(None,self.question_max_length))
         self.context_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
         self.labels_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
-        self.labels_placeholder = tf.placeholder(tf.int32,(None,self.context_max_length))
         self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
         self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
 
         self.dropout_placeholder = tf.placeholder(tf.float32)
         # ==== assemble pieces ====
         with tf.variable_scope("qa", initializer=tf.uniform_unit_scaling_initializer(1.0)):
-            self.setup_embeddings()
+            # self.setup_embeddings()
             self.setup_system()
-            self.setup_loss()
+            # self.setup_loss()
 
         # ==== set up training/updating procedure ====
         pass
@@ -212,9 +211,12 @@ class QASystem(object):
         After your modularized implementation of encoder and decoder
         you should call various functions inside encoder, decoder here
         to assemble your reading comprehension system!
-        :EncoderQ:
         """
-        # should we initialize this as zeros?? 
+        self.pred = self.setup_prediction_op()
+        self.loss = self.setup_loss(self.pred)
+        self.train_op = self.setup_training_op(self.loss)
+
+    def setup_prediction_op(self):
         h = tf.zeros(shape = [tf.shape(self.question_placeholder)[0], self.lstm_size], dtype = tf.float32)
 
         # Encode Question Input
@@ -249,16 +251,38 @@ class QASystem(object):
 
         print('encoded_context batch size @ setup:',tf.shape(encoded_context)[0])
         assert tf.shape(self.encoded_context)[1] = self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!" 
-
+        
         decoded_probability = self.decoder.decode_simple(question_state, encoded_context, self.lstm_size, self.n_classes)
 
-    def setup_loss(self):
+        return decoded_probability
+
+    def setup_loss(self,pred):
         """
         Set up your loss computation here
         :return:
         """
         with vs.variable_scope("loss"):
-            pass
+            loss = tf.reduce_mean(
+                   tf.boolean_mask(
+                       tf.nn.sparse_softmax_cross_entropy_with_logits(pred,
+                                                                      self.labels_placeholder), 
+                              self.context_mask_placeholder))
+        return loss
+
+    def setup_training_op(self, loss):
+        """Sets up the training Ops.
+
+        Creates an optimizer and applies the gradients to all trainable variables.
+        The Op returned by this function is what must be passed to the
+        `sess.run()` call to cause the model to train.
+        Args:
+            loss: Loss tensor, from cross_entropy_loss.
+        Returns:
+            train_op: The Op for training.
+        """
+        train_op = tf.train.AdamOptimizer(self.lr).minimize(loss)
+        return train_op
+
 
     def setup_embeddings(self):
         """

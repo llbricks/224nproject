@@ -36,7 +36,7 @@ tf.app.flags.DEFINE_string("embed_path", "", "Path to the trimmed GLoVe embeddin
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
-tf.app.flags.DEFINE_string("n_classes", 2, "Number of output classes (default: 2)")
+tf.app.flags.DEFINE_string("n_classes", 3, "Number of output classes (default: 2)")
 
 FLAGS = tf.app.flags.FLAGS
 
