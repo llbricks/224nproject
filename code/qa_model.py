@@ -86,7 +86,7 @@ class Encoder(object):
                 output, h = lstm(inputs[:,word_step],h, scope = scope )#*masks[:,word_step]
                 print('output shape:',output.get_shape())
                 print('mask shape:' , hidden_mask.get_shape())
-                output = output*masks[:,word_step]
+                output = output*hidden_mask[:,word_step]
                 # apply dropout
                 output = tf.nn.dropout(output, self.dropout_placeholder)
                 encoded.append(output)
