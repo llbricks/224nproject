@@ -53,10 +53,13 @@ class LSTMCell():
             b_f = tf.get_variable("b_f",(self.state_size),initializer = tf.constant_initializer(0))
 
             o_t = tf.sigmoid(tf.matmul(inputs,W_o) + tf.matmul(tf.transpose(tf.expand_dims(state[0],1)),U_o) + b_c)
-            c_t = tf.matmul(state[1],f_t) + i_t*c_t_tilde
-            c_t_tilde = np.tanh(tf.matmul(inputs,W_c) + tf.matmul(state[0],U_c) + b_c)
-            i_t = tf.sigmoid(tf.mat_mul(inputs,W_i) + tf.matmul(state[0],U_i) + b_i)
-            f_t = tf.sigmoid(tf.mat_mul(inputs,W_f) + tf.matmul(state[0],U_f) + b_f)
+            f_t = tf.sigmoid(tf.matmul(inputs,W_f) + tf.matmul(tf.transpose(tf.expand_dims(state[0],1)),U_f) + b_f)
+            i_t = tf.sigmoid(tf.matmul(inputs,W_i) + tf.matmul(tf.transpose(tf.expand_dims(state[0],1)),U_i) + b_i)
+            c_t_tilde = np.tanh(tf.matmul(inputs,W_c) + tf.matmul(tf.transpose(tf.expand_dims(state[0],1)),U_c) + b_c)
+            c_t = tf.matmul(tf.transpose(tf.expand_dims(state[1],1)),f_t) + i_t*c_t_tilde
+
+
+
 
             h_t = o_t * np.tanh(c_t)
 
