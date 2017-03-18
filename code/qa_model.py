@@ -65,7 +65,6 @@ class Encoder(object):
         batch_size = tf.shape(inputs)[0]
         passage_length = tf.shape(inputs)[1]
         embedding_size = inputs.get_shape().as_list()[2]
-        print('emb size',embedding_size)
 
         lstm = LSTMCell(lstm_size=lstm_size)
 
@@ -115,7 +114,7 @@ class Decoder(object):
         """
         # CONCERNS -------------------------------------------
         # ALL h VALUES INITIALIZED TO ZERO FOR NOW
-        # THIS JUST CONFUSES ME NOW, don't use this function, use the one after
+        # THIS JUST CONFUSES ME NOW, don't use this function, use decode_simple
         # ----------------------------------------------------
         batch_size = tf.shape(knowledge_rep)[0]
         passage_size = knowledge_rep.get_shape()[0]
@@ -155,12 +154,10 @@ class Decoder(object):
 
         batch_size = question_state.get_shape()[0]
         context_size = context_words.get_shape()[1]
-        lstm = tf.nn.rnn_cell.BasicLSTMCell(self.lstm_size,state_is_tuple = False)
 
-        # LSTM for decoded_start
+        # Decoded_start
         decoded_probability = []
         # h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
-        h = tf.zeros(shape = [self.batch_size, lstm_size], dtype = tf.float32)
         with tf.variable_scope('SimpleDecoder'):
             #setup variables for this scope
             softmax_w = tf.get_variable("softmax_w",
