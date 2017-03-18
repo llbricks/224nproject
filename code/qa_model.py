@@ -93,11 +93,11 @@ class Encoder(object):
                 if word_step == 0:
                     encoded = output
                 else:
-                    print('\n~ ~ ~ ECONDED value (word_step != 0:)')
+                    print('\n ~ ~ ~ ECONDED value (word_step != 0:)')
                     print(encoded)
                     print('\n ~ ~ ~ Output value (word_step != 0:)')
                     print(output)
-                    encoded = tf.concat([encoded,output],1)
+                    encoded = tf.concat_v2([encoded,output],1)
                 print('\n ~ ~ ~ encoded shape' )
                 print(encoded.get_shape())
         return (encoded, h)
