@@ -65,7 +65,7 @@ class Encoder(object):
         batch_size = tf.shape(inputs)[0]
         num_words = inputs.get_shape()[1]  #this should be either questions_max_length or context_max_length
 
-        lstm = LSTMCell(num_units= lstm_size)
+        lstm = LSTMCell(lstm_size)
 
 
         # LSTM for encoding the question
