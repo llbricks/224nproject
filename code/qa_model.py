@@ -63,34 +63,38 @@ class Encoder(object):
         print('\n')
         #print(tf.shape(inputs)[0])
         batch_size = tf.shape(inputs)[0]
-        num_words = inputs.get_shape()[1]  #this should be either questions_max_length or context_max_length
+        passage_length = tf.shape(inputs)[1]
+        embedding_size = inputs.get_shape().as_list()[2]
+        print('emb size',embedding_size)
 
         lstm = LSTMCell(lstm_size=lstm_size)
 
-
         # LSTM for encoding the question
-        encoded = []
-        h = encoder_state_input or tf.zeros([batch_size, lstm_size])
+        if encoder_state_input != None:
+            state = encoder_state_input
+        else:
+            h = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
+            c = tf.zeros(shape = [batch_size, lstm_size], dtype = tf.float32)
+            state = [h,c]
+
         with tf.variable_scope(scope):
-            for word_step in range(num_words):
-                print('\n Inputs[:][0] Shape')
-                print(inputs[:][0].get_shape())
-                print('\n')
+            for word_step in range(inputs.get_shape()[1]):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-                print('\n h Shape')
-                # print(h.get_shape())
-                print('\n inputs[:,word_step] Shape')
-                print(inputs[:,word_step].get_shape())
-                print('mask shape:' , masks[:,word_step].get_shape())
                 hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,lstm_size])
-                output, h = lstm(inputs[:,word_step],h, scope = scope )#*masks[:,word_step]
-                print('output shape:',output.get_shape())
-                print('mask shape:' , hidden_mask.get_shape())
+                output, h = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
                 output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
-                encoded.append(output)
+                output = tf.reshape(output,[batch_size,1,embedding_size])
+                print(output.get_shape())
+                if word_step == 0:
+                    encoded = output
+                else:
+                    print(encoded)
+                    print(output)
+                    encoded = tf.concat([encoded,output],1)
+                print(encoded.get_shape())
         return (encoded, h)
 
 class Decoder(object):
@@ -240,7 +244,6 @@ class QASystem(object):
         print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
         assert self.question_mask_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
-
         encoded_questions, q = self.encoder.encode(inputs = self.question_placeholder,
             masks = self.question_mask_placeholder,
             dropout = self.dropout_placeholder,
@@ -249,10 +252,12 @@ class QASystem(object):
             scope = "LSTM_encode_question",
             lstm_size = self.lstm_size)
 
-        print('encoded_questions batch size @ setup:',encoded_questions.get_shape()[0])
-        assert self.encoded_questions.get_shape()[1] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
-        print('h batch size @ setup:',h.get_shape()[0])
-        assert self.h.get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
+        print('encoded_questions batch size @ setup:',len(encoded_questions))
+        # print() encoded_questions[0].get_shape()[0])
+        assert encoded_questions[0].get_shape()[0] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
+        assert encoded_questions[0].get_shape()[1] == self.embedding_size, "Setup System: 'encoded_questions' is of the wrong shape!"
+        print('h batch size @ setup:',state[0].get_shape()[0])
+        assert state[0].get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
         # Encode Context Input
         print('context batch size @ setup:',self.context_placeholder.get_shape()[0])
