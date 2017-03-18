@@ -205,7 +205,6 @@ class QASystem(object):
         # ==== set up training/updating procedure ====
         pass
 
-
     def setup_system(self):
         """
         After your modularized implementation of encoder and decoder
