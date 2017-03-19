@@ -96,7 +96,7 @@ class Encoder(object):
                 print('Iinputs.get_shape()[1]\n')
                 print(inputs.get_shape()[1])
                 print(hidden_mask[:,word_step-1])"""
-                print(output.get_shape())
+                # print(output.get_shape())
 
                 output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
 
@@ -104,7 +104,7 @@ class Encoder(object):
                 output = tf.nn.dropout(output, dropout)
                 output = tf.reshape(output,[batch_size,1,lstm_size])
 
-                print(output.get_shape())
+                # print(output.get_shape())
                 #print('\n ~ ~ ~ Output shape' )
                 #print(output.get_shape())
                 if word_step == 0:
@@ -290,7 +290,7 @@ class QASystem(object):
         # print('encoded_questions batch size @ setup:',len(encoded_questions))
         # print() encoded_questions[0].get_shape()[0])
         assert encoded_questions[0].get_shape()[0] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
-        assert encoded_questions[0].get_shape()[1] == self.embedding_size, "Setup System: 'encoded_questions' is of the wrong shape!"
+        assert encoded_questions[0].get_shape()[1] == self.lstm_size, "Setup System: 'encoded_questions' is of the wrong shape!"
         #print('h batch size @ setup:',state[0].get_shape()[0])
         #print(state[0].get_shape())
         assert question_state[0].get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
