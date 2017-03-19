@@ -188,8 +188,8 @@ class Decoder(object):
 
             for wordIdx in range(context_size):
                 # make predictions for each word
-                assert tf.concat(question_state,context_words[:,wordIdx],axis=1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-                assert tf.concat(question_state,context_words[:,wordIdx],axis=1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
+                assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+                assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
                 logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
                 # do we need to apply softmax if we're using cross_entropy soft max?
                 decoded_probability.append(tf.nn.softmax(logits))
