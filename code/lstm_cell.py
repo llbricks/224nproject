@@ -32,7 +32,7 @@ class LSTMCell():
         # It's always a good idea to scope variables in functions lest they
         # be defined elsewhere!
         input_size = inputs.get_shape()[1]
-        print('Input size: ' , input_size)
+        #print('Input size: ' , input_size)
 
         with tf.variable_scope(scope):
             ### YOUR CODE HERE (~20-30 lines)

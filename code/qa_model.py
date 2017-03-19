@@ -79,24 +79,27 @@ class Encoder(object):
             state = [h,c]
 
         with tf.variable_scope(scope):
+            inpute_size = inputs.get_shape()[1]
+            # print(int(inpute_size), type(inpute_size))
             for word_step in range(inputs.get_shape()[1]):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-                hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,lstm_size])
+
+                hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,int(inpute_size)])
                 output, h = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
-                print('\n ~ ~ ~ Output shape' )
+                """print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
                 print('\n ~ ~ ~ Hidden mask' )
-                print(hidden_mask)
-                print('\n ~ ~ ~  word_step' )
-                print(word_step)
-                print(word_step)
+                print(hidden_mask)"""
+                print('~ ~ ~  word_step      ',word_step )
+                """
+                print('Iinputs.get_shape()[1]\n')
+                print(inputs.get_shape()[1])
+                print(hidden_mask[:,word_step-1])"""
 
-                output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
+                output = tf.boolean_mask(output,hidden_mask[:,word_step-1],name='boolean_mask')
 
                 # apply dropout
-                print('\n ~ ~ ~ Output shape' )
-                print(output.get_shape())
                 output = tf.nn.dropout(output, dropout)
                 output = tf.reshape(output,[batch_size,1,embedding_size])
                 #print('\n ~ ~ ~ Output shape' )
@@ -156,7 +159,7 @@ class Decoder(object):
 
         return (decoded_probability)
 
-    def decode_simple(self, knowledge_rep, scope, lstm_size,n_classes):
+    def decode_simple(self, question_state, context_words, lstm_size,n_classes):
         """
         takes in a knowledge representation
         and output a probability estimation over
@@ -180,11 +183,11 @@ class Decoder(object):
             softmax_w = tf.get_variable("softmax_w",
                             shape = [2*lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
-            softmax_b = tf.get_variable("softmax_b", tf.zeros(n_classes), dtype = tf.float32)
+            softmax_b = tf.get_variable(tf.zeros(n_classes), name="softmax_b", dtype = tf.float32)
 
             # make predictions for each word
-            assert tf.concat(question_state,context_words[:,wordIdx],axis=1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-            assert tf.concat(question_state,context_words[:,wordIdx],axis=1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
+            assert tf.concat_v2(question_state,context_words[:,wordIdx],axis=1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+            assert tf.concat_v2(question_state,context_words[:,wordIdx],axis=1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
             for wordIdx in range(context_size):
                 logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
                 # do we need to apply softmax if we're using cross_entropy soft max?
@@ -270,7 +273,7 @@ class QASystem(object):
         # print() encoded_questions[0].get_shape()[0])
         assert encoded_questions[0].get_shape()[0] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
         assert encoded_questions[0].get_shape()[1] == self.embedding_size, "Setup System: 'encoded_questions' is of the wrong shape!"
-        print('h batch size @ setup:',state[0].get_shape()[0])
+        #print('h batch size @ setup:',state[0].get_shape()[0])
         assert state[0].get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
         # Encode Context Input
@@ -287,6 +290,7 @@ class QASystem(object):
         #h = tf.zeros(shape = [new_shape, self.lstm_size], dtype = tf.float32)"""
 
 
+        #print(self.context_placeholder.get_shape())
 
         encoded_context, h, state = self.encoder.encode(inputs = self.context_placeholder,
             masks = self.context_mask_placeholder,
@@ -295,10 +299,10 @@ class QASystem(object):
             scope = "LSTM_encode_context",
             lstm_size = self.lstm_size)
 
-        print('encoded_context batch size @ setup:',encoded_context.get_shape[0])
-        assert self.encoded_context.get_shape()[1] == self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
+        print('encoded_context batch size @ setup:',encoded_context.get_shape()[0])
+        assert encoded_context.get_shape()[1] == self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
 
-        decoded_probability = self.decoder.decode_simple(question_state, encoded_context, self.lstm_size, self.n_classes)
+        decoded_probability = self.decoder.decode_simple(encoded_questions, encoded_context, self.lstm_size, self.n_classes)
 
         return decoded_probability
 
