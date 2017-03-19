@@ -210,7 +210,7 @@ class Decoder(object):
                 decoded_probability.append(tf.nn.softmax(logits))
 
 
-        assert length(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
+        assert len(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
         assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
         assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
 
