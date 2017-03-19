@@ -86,7 +86,7 @@ class Encoder(object):
                     tf.get_variable_scope().reuse_variables()
 
                 hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,int(inpute_size)])
-                output, h = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
+                output, state = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
                 """print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
                 print('\n ~ ~ ~ Hidden mask' )
@@ -315,10 +315,13 @@ class QASystem(object):
             scope = "LSTM_encode_context",
             lstm_size = self.lstm_size)
 
+        print(len(question_state))
+        print(question_state[0].get_shape(),'\n')
+
         print('encoded_context batch size @ setup:',encoded_context.get_shape()[0])
         assert encoded_context.get_shape()[1] == self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
 
-        decoded_probability = self.decoder.decode_simple(encoded_questions, encoded_context, self.lstm_size, self.n_classes)
+        decoded_probability = self.decoder.decode_simple(question_state, encoded_context, self.lstm_size, self.n_classes)
 
         return decoded_probability
 
