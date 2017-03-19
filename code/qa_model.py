@@ -192,12 +192,19 @@ class Decoder(object):
                 print('question_state shape ',question_state.get_shape())
                 print('context_words shape ',context_words[:,wordIdx].get_shape())
                 # tf.reshape(output,[batch_size,1,embedding_size])
-                concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx])],[batch_size, 1, embedding_size],1)
-                assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-                assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
-                logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
+                #print(tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size]).get_shape())
+
+                concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1)
+
+                assert tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+                assert tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
+                logits = tf.matmul(tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],axis=1), softmax_w) + softmax_b
+
+
                 # do we need to apply softmax if we're using cross_entropy soft max?
                 decoded_probability.append(tf.nn.softmax(logits))
+
+
         assert length(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
         assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
         assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
