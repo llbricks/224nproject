@@ -185,7 +185,7 @@ class Decoder(object):
                             shape = [2*lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
             #init_softmax_b = tf.zeros(n_classes, dtype = tf.float32)
-            softmax_b = tf.get_variable("softmax_w", n_classes, dtype = tf.float32)
+            softmax_b = tf.get_variable("softmax_b", n_classes, dtype = tf.float32)
 
 
             for wordIdx in range(context_size):
