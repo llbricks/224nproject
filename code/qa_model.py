@@ -195,9 +195,9 @@ class Decoder(object):
                 #print(tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size]).get_shape())
 
                 concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1)
-
-                assert tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-                assert tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
+                print('\n',concated.get_shape())
+                assert concated.get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+                assert concated.get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
                 logits = tf.matmul(tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],axis=1), softmax_w) + softmax_b
 
 
