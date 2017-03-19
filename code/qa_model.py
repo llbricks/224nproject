@@ -114,7 +114,7 @@ class Encoder(object):
                     encoded = tf.concat_v2([encoded,output],1)
                 # print('\n ~ ~ ~ encoded shape' )
                 # print(encoded.get_shape())
-        return (encoded, h, state)
+        return (encoded, state)
 
 class Decoder(object):
     def __init__(self, output_size):
@@ -184,7 +184,8 @@ class Decoder(object):
             softmax_w = tf.get_variable("softmax_w",
                             shape = [2*lstm_size,n_classes],
                             initializer = tf.contrib.layers.xavier_initializer())
-            softmax_b = tf.zeros(n_classes, dtype = tf.float32)
+            #init_softmax_b = tf.zeros(n_classes, dtype = tf.float32)
+            softmax_b = tf.get_variable("softmax_w", n_classes, dtype = tf.float32)
 
 
             for wordIdx in range(context_size):
@@ -195,10 +196,11 @@ class Decoder(object):
                 #print(tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size]).get_shape())
 
                 concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],1)
-                print('\n',concated.get_shape())
-                assert concated.get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
-                assert concated.get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
-                logits = tf.matmul(tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size])],axis=1), softmax_w) + softmax_b
+                print('\n',concated.get_shape(),'\n')
+                #assert concated.get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
+                #assert concated.get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
+                print(softmax_w.get_shape())
+                logits = tf.matmul(concated, softmax_w) + softmax_b
 
 
                 # do we need to apply softmax if we're using cross_entropy soft max?
@@ -274,7 +276,7 @@ class QASystem(object):
         # print('question mask size @ setup:',self.question_mask_placeholder.get_shape()[0])
         assert self.question_mask_placeholder.get_shape()[1] == self.question_max_length, "Setup System: 'question_mask_placeholder' is of the wrong shape!"
 
-        encoded_questions, q, state = self.encoder.encode(inputs = self.question_placeholder,
+        encoded_questions, question_state = self.encoder.encode(inputs = self.question_placeholder,
             masks = self.question_mask_placeholder,
             dropout = self.dropout_placeholder,
             # encoder_state_input = h,
@@ -287,7 +289,8 @@ class QASystem(object):
         assert encoded_questions[0].get_shape()[0] == self.question_max_length, "Setup System: 'encoded_questions' is of the wrong shape!"
         assert encoded_questions[0].get_shape()[1] == self.embedding_size, "Setup System: 'encoded_questions' is of the wrong shape!"
         #print('h batch size @ setup:',state[0].get_shape()[0])
-        assert state[0].get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
+        #print(state[0].get_shape())
+        assert question_state[0].get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
         # Encode Context Input
         print('context batch size @ setup:',self.context_placeholder.get_shape()[0])
@@ -305,10 +308,10 @@ class QASystem(object):
 
         #print(self.context_placeholder.get_shape())
 
-        encoded_context, h, state = self.encoder.encode(inputs = self.context_placeholder,
+        encoded_context, context_state = self.encoder.encode(inputs = self.context_placeholder,
             masks = self.context_mask_placeholder,
             dropout = self.dropout_placeholder,
-            encoder_state_input = q,
+            encoder_state_input = question_state,
             scope = "LSTM_encode_context",
             lstm_size = self.lstm_size)
 
