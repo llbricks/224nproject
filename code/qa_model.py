@@ -174,7 +174,7 @@ class Decoder(object):
 
         batch_size = question_state.get_shape()[0]
         context_size = context_words.get_shape()[1]
-        embedding_size = question_state.get_shape().as_list()[2]
+        # embedding_size = question_state.get_shape().as_list()[2]
 
         # Decoded_start
         decoded_probability = []
@@ -321,7 +321,7 @@ class QASystem(object):
         print('encoded_context batch size @ setup:',encoded_context.get_shape()[0])
         assert encoded_context.get_shape()[1] == self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
 
-        decoded_probability = self.decoder.decode_simple(question_state, encoded_context, self.lstm_size, self.n_classes)
+        decoded_probability = self.decoder.decode_simple(question_state[0], encoded_context, self.lstm_size, self.n_classes)
 
         return decoded_probability
 
