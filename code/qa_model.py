@@ -188,6 +188,9 @@ class Decoder(object):
 
             for wordIdx in range(context_size):
                 # make predictions for each word
+                print('question_state shape ',question_state.get_shape())
+                print('context_words shape ',context_words[:,wordIdx].get_shape())
+
                 assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
                 assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
                 logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
@@ -235,7 +238,7 @@ class QASystem(object):
         self.dropout_placeholder = tf.placeholder(tf.float32)
         # ==== assemble pieces ====
         with tf.variable_scope("qa", initializer=tf.uniform_unit_scaling_initializer(1.0)):
-            # self.setup_embeddings()
+            #self.setup_embeddings()
             self.setup_system()
             # self.setup_loss()
 
