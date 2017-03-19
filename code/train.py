@@ -151,12 +151,15 @@ def main(_):
     qa = QASystem(encoder, decoder, FLAGS)
 
     # make log file
+    print('##########  MAKE LOG  FILES   ######################\n')
+
     if not os.path.exists(FLAGS.log_dir):
         os.makedirs(FLAGS.log_dir)
     file_handler = logging.FileHandler(pjoin(FLAGS.log_dir, "log.txt"))
     logging.getLogger().addHandler(file_handler)
 
     # save flags
+    print('##########  SAVE FLAGS   ######################\n')
     print(vars(FLAGS))
     with open(os.path.join(FLAGS.log_dir, "flags.json"), 'w') as fout:
         json.dump(FLAGS.__flags, fout)
