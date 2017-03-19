@@ -21,7 +21,7 @@ def get_word2embed_dict(embedding, vocab):
 def preprocess_sequence_data(dataset, embed_dict, question_max_length, context_max_length, n_features):
 
     ret = []
-    for ((question, context), answer_span) in dataset:
+    for (question, context, answer_span) in dataset:
         # replace tokens with corresponding embedding
         question_embed = embed(question, embed_dict)
         context_embed = embed(context, embed_dict)
