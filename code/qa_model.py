@@ -208,11 +208,11 @@ class Decoder(object):
 
                 # do we need to apply softmax if we're using cross_entropy soft max?
                 decoded_probability.append(tf.nn.softmax(logits))
-
-
+        #print(decoded_probability,'\n')
+        #print(decoded_probability[0].get_shape())
         assert len(decoded_probability) == context_size, 'Decode_simple: decoded is not expected shape'
-        assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
-        assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
+        #assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
+        #assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
 
         return decoded_probability
 
@@ -245,7 +245,7 @@ class QASystem(object):
         self.decoder = decoder
         self.question_placeholder = tf.placeholder(tf.float32,(None,self.question_max_length,self.embedding_size))
         self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length,self.embedding_size))
-        self.labels_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length))
+        self.labels_placeholder = tf.placeholder(tf.int64,(None,self.context_max_length))
         self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
         self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.context_max_length))
 
