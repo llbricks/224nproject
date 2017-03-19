@@ -96,12 +96,15 @@ class Encoder(object):
                 print('Iinputs.get_shape()[1]\n')
                 print(inputs.get_shape()[1])
                 print(hidden_mask[:,word_step-1])"""
+                print(output.get_shape())
 
-                output = tf.boolean_mask(output,hidden_mask[:,word_step-1],name='boolean_mask')
+                output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
 
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
-                output = tf.reshape(output,[batch_size,1,embedding_size])
+                output = tf.reshape(output,[batch_size,1,lstm_size])
+
+                print(output.get_shape())
                 #print('\n ~ ~ ~ Output shape' )
                 #print(output.get_shape())
                 if word_step == 0:
