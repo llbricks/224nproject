@@ -52,11 +52,12 @@ class LSTMCell():
             U_f = tf.get_variable("U_f",(self.state_size,self.state_size), initializer = tf.contrib.layers.xavier_initializer())
             b_f = tf.get_variable("b_f",(self.state_size),initializer = tf.constant_initializer(0))
 
-            o_t = tf.sigmoid(tf.matmul(inputs,W_o) + tf.matmul(tf.transpose(state[0]),U_o) + b_c)
-            f_t = tf.sigmoid(tf.matmul(inputs,W_f) + tf.matmul(tf.transpose(state[0]),U_f) + b_f)
-            i_t = tf.sigmoid(tf.matmul(inputs,W_i) + tf.matmul(tf.transpose(state[0]),U_i) + b_i)
-            c_t_tilde = tf.tanh(tf.matmul(inputs,W_c) + tf.matmul(tf.transpose(state[0]),U_c) + b_c)
-            c_t = tf.matmul(tf.transpose(state[1]),f_t) + i_t*c_t_tilde
+            o_t = tf.sigmoid(tf.matmul(inputs,W_o) + tf.matmul(state[0],U_o) + b_c)
+
+            f_t = tf.sigmoid(tf.matmul(inputs,W_f) + tf.matmul(state[0],U_f) + b_f)
+            i_t = tf.sigmoid(tf.matmul(inputs,W_i) + tf.matmul(state[0],U_i) + b_i)
+            c_t_tilde = tf.tanh(tf.matmul(inputs,W_c) + tf.matmul(state[0],U_c) + b_c)
+            c_t = tf.matmul(state[1],f_t) + i_t*c_t_tilde
 
 
 
