@@ -179,5 +179,8 @@ def main(_):
         # qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
         qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
 
+
+        load_val_dir = get_normalized_train_dir(FLAGS.load_val_dir or FLAGS.val_dir)
+
 if __name__ == "__main__":
     tf.app.run()
