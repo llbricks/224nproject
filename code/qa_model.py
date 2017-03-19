@@ -174,6 +174,7 @@ class Decoder(object):
 
         batch_size = question_state.get_shape()[0]
         context_size = context_words.get_shape()[1]
+        embedding_size = question_state.get_shape().as_list()[2]
 
         # Decoded_start
         decoded_probability = []
@@ -190,7 +191,8 @@ class Decoder(object):
                 # make predictions for each word
                 print('question_state shape ',question_state.get_shape())
                 print('context_words shape ',context_words[:,wordIdx].get_shape())
-
+                # tf.reshape(output,[batch_size,1,embedding_size])
+                concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx])],[batch_size, 1, embedding_size],1)
                 assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
                 assert tf.concat_v2([question_state,context_words[:,wordIdx]],1).get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
                 logits = tf.matmul(tf.concat(question_state,context_words[:,wordIdx],axis=1), softmax_w) + softmax_b
