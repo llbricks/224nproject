@@ -198,7 +198,7 @@ class Decoder(object):
                 # tf.reshape(output,[batch_size,1,embedding_size])
                 #print(tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size]).get_shape())
 
-                concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[batch_size, lstm_size])],1)
+                concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(question_state)[0], lstm_size])],1)
                 print('\n',concated.get_shape(),'\n')
                 #assert concated.get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
                 #assert concated.get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
