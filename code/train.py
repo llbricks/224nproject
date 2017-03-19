@@ -165,6 +165,7 @@ def main(_):
         json.dump(FLAGS.__flags, fout)
 
     # run training on QA model on training data
+    print('\n ########## START TRAINING ############## \n')
     with tf.Session() as sess:
         load_train_dir = get_normalized_train_dir(FLAGS.load_train_dir or FLAGS.train_dir)
         initialize_model(sess, qa, load_train_dir)
