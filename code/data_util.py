@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 from defs import LBLS, NUM, UNK
+from collections import OrderedDict
 
 def get_word2embed_dict(embedding, vocab):
     """
