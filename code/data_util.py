@@ -64,7 +64,7 @@ def normalize(word):
 def labelize(span, max_length):
     # create negative label list
     ml = max_length
-    labels = [None]* ml
+    labels = [LBLS[-1]]* ml
     # set appropriate labels positive
     # if span[0] < ml:
     #     start = span[0]
@@ -72,10 +72,8 @@ def labelize(span, max_length):
     #     labels[start:end] = LBLS[0] * (end - start)
     if span[0]< ml:
         labels[span[0]] = LBLS[0]
-        labels[span[1]] = LBLS[-1]
     if span[1]< ml:
         labels[span[1]] = LBLS[1]
-        labels[span[0]] = LBLS[-1]
 
     assert len(labels) == max_length, "Labelize: 'labels' is of the wrong shape!"
 
