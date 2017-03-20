@@ -82,7 +82,7 @@ class Encoder(object):
             inpute_size = inputs.get_shape()[1]
             encoded = None
             # print(int(inpute_size), type(inpute_size))
-            for word_step in range(inputs.get_shape()[1]):
+            for word_step in xrange(inputs.get_shape()[1]):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
 

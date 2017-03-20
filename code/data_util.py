@@ -21,7 +21,8 @@ def get_word2embed_dict(embedding, vocab):
         # assert vocab[key] != 0
         # assert vocab[key] != 1
         ret[key] = embedding[vocab[key]]
-    ret[UNK] = np.zeros(embd_size)
+    ret[UNK] = embedding[vocab['<pad>']]
+    #ret[UNK] = np.zeros(embd_size)
     # print(type(ret[UNK]))
     # print(type(ret[ret.keys()[0]]))
 
