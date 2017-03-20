@@ -59,9 +59,9 @@ class Encoder(object):
                  or both.
         """
         """
-        print('\n')
-        print(inputs.get_shape())
-        print('\n')
+        # print('\n')
+        # print(inputs.get_shape())
+        # print('\n')
         """
         #print(tf.shape(inputs)[0])
         batch_size = tf.shape(inputs)[0]
@@ -91,7 +91,7 @@ class Encoder(object):
                 print(output.get_shape())
                 print('\n ~ ~ ~ Hidden mask' )
                 print(hidden_mask)"""
-                print('~ ~ ~  word_step      ',word_step )
+                # print('~ ~ ~  word_step      ',word_step )
                 """
                 print('Iinputs.get_shape()[1]\n')
                 print(inputs.get_shape()[1])
@@ -193,16 +193,16 @@ class Decoder(object):
 
             for wordIdx in range(context_size):
                 # make predictions for each word
-                print('question_state shape ',question_state.get_shape())
-                print('context_words shape ',context_words[:,wordIdx].get_shape())
+                # print('question_state shape ',question_state.get_shape())
+                # print('context_words shape ',context_words[:,wordIdx].get_shape())
                 # tf.reshape(output,[batch_size,1,embedding_size])
                 #print(tf.reshape(context_words[:,wordIdx],[tf.shape(context_words[:,wordIdx])[0], 1, embedding_size]).get_shape())
 
                 concated = tf.concat_v2([question_state,tf.reshape(context_words[:,wordIdx],[tf.shape(question_state)[0], lstm_size])],1)
-                print('\n',concated.get_shape(),'\n')
+                # print('\n',concated.get_shape(),'\n')
                 #assert concated.get_shape()[1] == 2*lstm_size, 'Decode_simple: input is not expected shape'
                 #assert concated.get_shape()[0] == batch_size, 'Decode_simple: input is not expected shape'
-                print(softmax_w.get_shape())
+                # print(softmax_w.get_shape())
                 logits = tf.matmul(concated, softmax_w) + softmax_b
 
 
@@ -296,9 +296,9 @@ class QASystem(object):
         assert question_state[0].get_shape()[1] == self.lstm_size, "Setup System: 'h' is of the wrong shape!"
 
         # Encode Context Input
-        print('context batch size @ setup:',self.context_placeholder.get_shape()[0])
+        # print('context batch size @ setup:',self.context_placeholder.get_shape()[0])
         assert self.context_placeholder.get_shape()[1] == self.context_max_length, "Setup System: 'context_placeholder' is of the wrong shape!"
-        print('context mask batch size @ setup:',self.context_mask_placeholder.get_shape()[0])
+        # print('context mask batch size @ setup:',self.context_mask_placeholder.get_shape()[0])
         assert self.context_mask_placeholder.get_shape()[1] == self.context_max_length, "Setup System: 'context_mask_placeholder' is of the wrong shape!"
 
         """print('\n self.context_placeholder.get_shape()[0]')
@@ -318,10 +318,10 @@ class QASystem(object):
             scope = "LSTM_encode_context",
             lstm_size = self.lstm_size)
 
-        print(len(question_state))
-        print(question_state[0].get_shape(),'\n')
+        # print(len(question_state))
+        # print(question_state[0].get_shape(),'\n')
 
-        print('encoded_context batch size @ setup:',encoded_context.get_shape()[0])
+        # print('encoded_context batch size @ setup:',encoded_context.get_shape()[0])
         assert encoded_context.get_shape()[1] == self.context_max_length, "Setup System: 'encoded_context' is of the wrong shape!"
 
         decoded_probability = self.decoder.decode_simple(question_state[0], encoded_context, self.lstm_size, self.n_classes)
@@ -623,7 +623,7 @@ class QASystem(object):
 
 
 
-        print('YAY! we have our examples embedded now! ')
+        # print('YAY! we have our examples embedded now! ')
         best_score = 0.
         for epoch in range(self.n_epochs):
 
@@ -632,33 +632,26 @@ class QASystem(object):
 
             question, context, qmask, cmask, answer = train_examples[0]
 
-            print('question shape:',len(question))
-            print('question shape:',len(question[0]))
-            print('context shape:',len(context))
-            print('context shape:',len(context[0]))
+            # print('question shape:',len(question))
+            # print('question shape:',len(question[0]))
+            # print('context shape:',len(context))
+            # print('context shape:',len(context[0]))
             # print('context shape:',context)
             # print('labels shape:',answer.shape)
             # print('question mask shape:',qmask.shape)
             # print('context mask shape:',cmask.shape)
 
             batched = minibatches(train_examples, self.batch_size)
-            print(type(batched))
-
-
-            print('question shape:',question.shape)
-            print('context shape:',context.shape)
-            print('labels shape:',answer.shape)
-            print('question mask shape:',qmask.shape)
-            print('context mask shape:',cmask.shape)
+            # print(type(batched))
 
             for i, batch in enumerate(batched):
-                print('its going ok so far!!!')
+                # print('its going ok so far!!!')
 
                 _, loss = self.optimize(session,*batch)
 
                 prog.update(i + 1, [("train loss", loss)])
                 if self.report: self.report.log_train_loss(loss)
-            print("")
+            # print("")
 
             logging.info("Evaluating on development data")
             f1, em = self.evaluate_answer(session, validation_examples, vocab)
@@ -668,7 +661,7 @@ class QASystem(object):
                 if saver:
                     logging.info("New best score! Saving model in %s", train_dir)
                     saver.save(sess, train_dir)
-            print("")
+            # print("")
             if self.report:
                 self.report.log_epoch()
                 self.report.save()

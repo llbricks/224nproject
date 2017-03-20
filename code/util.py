@@ -153,7 +153,7 @@ def load_word_vector_mapping(vocab_fstream, vector_fstream):
         vocab = vocab.strip()
         vector = vector.strip()
         ret[vocab] = array(list(map(float, vector.split())))
-        print type(array(list(map(float, vector.split()))))
+        # print type(array(list(map(float, vector.split()))))
     return ret
 
 def test_load_word_vector_mapping():
@@ -452,33 +452,33 @@ def minibatches(data, batch_size, shuffle=True):
     a,b,c,d,e = data[0]
     batch  = []
 
-    print(type(a))
-    print(type(a[8]))
-    print(type(a[0][0]))
-    print(type(b))
-    print(type(b[0]))
-    print(type(b[0][0]))
-    print('---------------------------')
-    for k in xrange((len(a))):
-        print(type(a[k]))
-    print('---------------------------')
-    for k in xrange((len(a))):
-        print(type(b[k]))
-    print('---------------------------')
+    # print(type(a))
+    # print(type(a[8]))
+    # print(type(a[0][0]))
+    # print(type(b))
+    # print(type(b[0]))
+    # print(type(b[0][0]))
+    # print('---------------------------')
+    # for k in xrange((len(a))):
+    #     print(type(a[k]))
+    # print('---------------------------')
+    # for k in xrange((len(a))):
+    #     print(type(b[k]))
+    # print('---------------------------')
 
-    print(len(a))
-    print(len(a[0])) 
+    # print(len(a))
+    # print(len(a[0])) 
 
-    print(len(b))
-    print(len(b[0])) 
+    # print(len(b))
+    # print(len(b[0])) 
 
     batches = [np.array(col) for col in zip(*data)]
-    print(len(batches))
-    print(batches[0].shape)
-    print(batches[1].shape)
-    print(batches[2].shape)
-    print(batches[3].shape)
-    print(batches[4].shape)
+    # print(len(batches))
+    # print(batches[0].shape)
+    # print(batches[1].shape)
+    # print(batches[2].shape)
+    # print(batches[3].shape)
+    # print(batches[4].shape)
 
     return get_minibatches(batches, batch_size, shuffle)
 

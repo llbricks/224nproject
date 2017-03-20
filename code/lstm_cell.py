@@ -57,10 +57,7 @@ class LSTMCell():
             f_t = tf.sigmoid(tf.matmul(inputs,W_f) + tf.matmul(state[0],U_f) + b_f)
             i_t = tf.sigmoid(tf.matmul(inputs,W_i) + tf.matmul(state[0],U_i) + b_i)
             c_t_tilde = tf.tanh(tf.matmul(inputs,W_c) + tf.matmul(state[0],U_c) + b_c)
-            c_t = tf.matmul(state[1],f_t) + i_t*c_t_tilde
-
-
-
+            c_t = state[1]*f_t + i_t*c_t_tilde
 
             h_t = o_t * tf.tanh(c_t)
 

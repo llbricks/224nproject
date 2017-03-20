@@ -181,7 +181,7 @@ def main(_):
 
     # save flags
     print('##########  SAVE FLAGS   ######################\n')
-    print(vars(FLAGS))
+    # print(vars(FLAGS))
     with open(os.path.join(FLAGS.log_dir, "flags.json"), 'w') as fout:
         json.dump(FLAGS.__flags, fout)
 

@@ -77,15 +77,15 @@ def embed(tokens, embed_dict):
         # print('-------after norm--------------------')
         # print(type(word))
         # print(word)
-
+        wv = embed_dict.get(word,embed_dict[UNK])
         # word's embedding (UNK's embedding otherwise)
-        if word in embed_dict.keys():
-            wv = embed_dict[word]
+        # if word in embed_dict.keys():
+        #     wv = embed_dict[word]
             # print('this word is fine')
             # print(type(wv))
-        else:
+        # else:
             # print('THIS WORD IS UNK!!!! ----------------------------------------')
-            wv = embed_dict[UNK]
+            # wv = embed_dict[UNK]
             # print(type(wv))
         # print('-------word vector--------------------')
         # print(type(wv))
@@ -133,7 +133,7 @@ def labelize(span, max_length):
 
 def pad(word_vector, n_features, max_length):
     # initialize padding variables
-    zero_vector = [0] * n_features
+    zero_vector = [np.zeros(n_features)]
     zero_label = 0
     # pad word_vector to max_length
     pad_len = max(max_length - len(word_vector), 0)
