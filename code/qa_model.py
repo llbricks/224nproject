@@ -396,8 +396,8 @@ class QASystem(object):
         if context_batch is not None:
             input_feed[self.context_placeholder] = context_batch
 
-        if answer_batch is not None:
-            input_feed[self.labels_placeholder] = answer_batch
+        if labels_batch is not None:
+            input_feed[self.labels_placeholder] = labels_batch
 
         if question_mask_batch is not None:
             input_feed[self.question_mask_placeholder] = question_mask_batch
@@ -408,7 +408,7 @@ class QASystem(object):
         input_feed[self.dropout_placeholder] = dropout
         # feed_dict[self.dropout_placeholder] = dropout
         ### END YOUR CODE
-        return feed_dict
+        return input_feed
 
     def optimize(self, session, question_batch, context_batch, answer_batch, question_mask_batch, context_mask_batch):
         """
@@ -421,7 +421,7 @@ class QASystem(object):
                                       context_batch = context_batch,
                                       question_mask_batch = question_mask_batch,
                                       context_mask_batch = context_mask_batch,
-                                      labels_batch = labels_batch,
+                                      labels_batch = answer_batch,
                                       dropout = self.dropout)
 
         # fill in this feed_dictionary like:
@@ -588,9 +588,10 @@ class QASystem(object):
 
         embed_dict = get_word2embed_dict(embeddings, vocab)
 
+        print('preprocessing train data')
         train_examples = preprocess_sequence_data(train, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
         validation_examples = preprocess_sequence_data(validation, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
-
+        print('YAY! we have our examples embedded now! ')
         best_score = 0.
         for epoch in range(self.n_epochs):
 

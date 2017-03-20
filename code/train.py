@@ -23,7 +23,8 @@ tf.app.flags.DEFINE_float("dropout", 0.15, "Fraction of units randomly dropped o
 tf.app.flags.DEFINE_integer("batch_size", 10, "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("epochs", 10, "Number of epochs to train.")
 tf.app.flags.DEFINE_integer("state_size", 200, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
+# tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
+tf.app.flags.DEFINE_integer("output_size", 10, "The output size of your model.")
 tf.app.flags.DEFINE_integer("embedding_size", 100, "Size of the pretrained vocabulary.")
 tf.app.flags.DEFINE_string("data_dir", "../../data/squad/", "SQuAD directory (default ../../data/squad)")
 tf.app.flags.DEFINE_string("train_dir", "train", "Training directory to save the model parameters (default: ./train).")
@@ -38,7 +39,9 @@ tf.app.flags.DEFINE_string("vocab_path", "../../data/squad/vocab.dat", "Path to 
 tf.app.flags.DEFINE_string("embed_path", "../../data/squad/glove.trimmed.100.npz", "Path to the trimmed GLoVe embedding (default: ../../data/squad/glove.trimmed.{embedding_size}.npz)")
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
-tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
+# tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
+tf.app.flags.DEFINE_string("question_size", 10, "Size of question (default: 70)")
+
 tf.app.flags.DEFINE_string("n_classes", 3, "Number of output classes (default: 2)")
 
 FLAGS = tf.app.flags.FLAGS
