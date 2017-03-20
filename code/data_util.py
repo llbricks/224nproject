@@ -12,11 +12,19 @@ def get_word2embed_dict(embedding, vocab):
     Assumes each line of the vocab file matches with those of the embedding
     file.
     """
-    embd_size = len(embedding[0])
+    # print(type(embedding))
+    embd_size = embedding[0].shape
     ret = OrderedDict()
     for key in vocab.keys():
+        # print(key)
+        # print(vocab[key])
+        # assert vocab[key] != 0
+        # assert vocab[key] != 1
         ret[key] = embedding[vocab[key]]
-    ret[UNK] = [0]*embd_size
+    ret[UNK] = np.zeros(embd_size)
+    # print(type(ret[UNK]))
+    # print(type(ret[ret.keys()[0]]))
+
     return ret
 
 
@@ -25,8 +33,14 @@ def preprocess_sequence_data(dataset, embed_dict, question_max_length, context_m
     ret = []
     for (question, context, answer_span) in dataset:
         # replace tokens with corresponding embedding
+        a = question
+        b = context
+
         question_embed = embed(question, embed_dict)
         context_embed = embed(context, embed_dict)
+        a = question_embed
+        b = context_embed
+
         # print("question_embed:",len(question_embed))
         # print("question_embed:",len(question_embed[0]))
         # print("context_embed:",len(context_embed))
@@ -52,10 +66,31 @@ def embed(tokens, embed_dict):
 
     ret = []
     for token in tokens:
+
+        # print('---------token------------------')
+        # print(type(token))
+        # print(token)
+        # print('---------------------------')
+
         # normalize token to find it in embed_dict
         word = normalize(token)
+        # print('-------after norm--------------------')
+        # print(type(word))
+        # print(word)
+
         # word's embedding (UNK's embedding otherwise)
-        wv = embed_dict.get(word, embed_dict[UNK])
+        if word in embed_dict.keys():
+            wv = embed_dict[word]
+            # print('this word is fine')
+            # print(type(wv))
+        else:
+            # print('THIS WORD IS UNK!!!! ----------------------------------------')
+            wv = embed_dict[UNK]
+            # print(type(wv))
+        # print('-------word vector--------------------')
+        # print(type(wv))
+        # print(wv)
+        # assert len(wv)>2 , 'STRING!!! ----------------------------'
 
         ret.append(wv)
 

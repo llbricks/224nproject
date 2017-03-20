@@ -612,8 +612,17 @@ class QASystem(object):
         embed_dict = get_word2embed_dict(embeddings, vocab)
 
         print('preprocessing train data')
+        a,b,c = train[0]
+
+
         train_examples = preprocess_sequence_data(train, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
+        a,b,c,d,e = train_examples[0]
+
+
         validation_examples = preprocess_sequence_data(validation, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
+
+
+
         print('YAY! we have our examples embedded now! ')
         best_score = 0.
         for epoch in range(self.n_epochs):
