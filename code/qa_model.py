@@ -94,7 +94,7 @@ class Encoder(object):
                 # print('~ ~ ~  word_step      ',word_step )
                 """
                 print('Iinputs.get_shape()[1]\n')
-                print(inputs.get_shape()[1])
+                print(inputs.get_shape()[1])s
                 print(hidden_mask[:,word_step-1])"""
                 # print(output.get_shape())
 
@@ -675,7 +675,7 @@ class QASystem(object):
             # print(type(batched))
 
             for i, batch in enumerate(batched):
-                # print('its going ok so far!!!')
+                # print('its going ok so predfar!!!')
 
                 _, loss = self.optimize(session,*batch)
 
