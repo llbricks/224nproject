@@ -53,9 +53,9 @@ def read_json_ids(fstream):
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
 
-    ids_context = open(fstream + '.ids.context').read().split('\n')[:,100]
-    ids_question = open(fstream + '.ids.question').read().split('\n')[:,100]
-    ids_answer = open(fstream + '.span').read().split('\n')[:,100]
+    ids_context = open(fstream + '.ids.context').read().split('\n')
+    ids_question = open(fstream + '.ids.question').read().split('\n')
+    ids_answer = open(fstream + '.span').read().split('\n')
     dataset = []
     for k in xrange(len(ids_context)):
         L = [map(int,ids_question[k].split())]
@@ -72,9 +72,9 @@ def read_json(fstream):
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
 
-    context = open(fstream + '.context').read().split('\n')[:100]
-    question = open(fstream + '.question').read().split('\n')[:100]
-    answer = open(fstream + '.span').read().split('\n')[:100]
+    context = open(fstream + '.context').read().split('\n')
+    question = open(fstream + '.question').read().split('\n')
+    answer = open(fstream + '.span').read().split('\n')
     dataset = []
     for k in range(len(context)-1):
         #print(k,' out of ',len(context))

@@ -21,11 +21,11 @@ tf.app.flags.DEFINE_float("learning_rate", 0.01, "Learning rate.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 10.0, "Clip gradients to this norm.")
 tf.app.flags.DEFINE_float("dropout", 0.15, "Fraction of units randomly dropped on non-recurrent connections.")
 # tf.app.flags.DEFINE_integer("batch_size", 10, "Batch size to use during training.")
-tf.app.flags.DEFINE_integer("batch_size", 16, "Batch size to use during training.")
+tf.app.flags.DEFINE_integer("batch_size", 32, "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("epochs", 10, "Number of epochs to train.")
 tf.app.flags.DEFINE_integer("state_size", 200, "Size of each model layer.")
-# tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
-tf.app.flags.DEFINE_integer("output_size", 17, "The output size of your model.")
+tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
+# tf.app.flags.DEFINE_integer("output_size", 17, "The output size of your model.")
 tf.app.flags.DEFINE_integer("embedding_size", 100, "Size of the pretrained vocabulary.")
 tf.app.flags.DEFINE_string("data_dir", "../../data/squad/", "SQuAD directory (default ../../data/squad)")
 tf.app.flags.DEFINE_string("train_dir", "../../data/squad/", "Training directory to save the model parameters (default: ./train).")
@@ -41,7 +41,7 @@ tf.app.flags.DEFINE_string("embed_path", "../../data/squad/glove.trimmed.100.npz
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 # tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
-tf.app.flags.DEFINE_string("question_size", 15, "Size of question (default: 70)")
+tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
 
 tf.app.flags.DEFINE_string("n_classes", 3, "Number of output classes (default: 2)")
 
