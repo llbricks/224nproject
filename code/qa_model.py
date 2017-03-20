@@ -80,6 +80,7 @@ class Encoder(object):
 
         with tf.variable_scope(scope):
             inpute_size = inputs.get_shape()[1]
+            encoded = None
             # print(int(inpute_size), type(inpute_size))
             for word_step in range(inputs.get_shape()[1]):
                 if word_step >= 1:
@@ -99,10 +100,13 @@ class Encoder(object):
                 # print(output.get_shape())
 
                 output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
-
+                print('output bolean mask  ',output.get_shape().as_list())
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
-                output = tf.reshape(output,[batch_size,1,lstm_size])
+                print('output dropout ',output.get_shape().as_list())
+                print('batch size   ',batch_size.get_shape(), '        lstm size        ', lstm_size )
+                output =  tf.reshape(output,[batch_size,1,lstm_size])
+                print('output reshape ',output.get_shape().as_list())
 
                 # print(output.get_shape())
                 #print('\n ~ ~ ~ Output shape' )
@@ -115,6 +119,7 @@ class Encoder(object):
                 #    print('\n ~ ~ ~ Output value (word_step != 0:)')
                 #    print(output)
                     encoded = tf.concat_v2([encoded,output],1)
+
                 # print('\n ~ ~ ~ encoded shape' )
                 # print(encoded.get_shape())
         return (encoded, state)
