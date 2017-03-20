@@ -449,7 +449,7 @@ def minibatch(data, minibatch_idx):
 
 def minibatches(data, batch_size, shuffle=True):
 
-    a,b,c,d,e = data[0]
+    # a,b,c,d,e = data[0]
     batch  = []
 
     # print(type(a))

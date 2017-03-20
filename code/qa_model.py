@@ -554,7 +554,7 @@ class QASystem(object):
         return valid_cost
 
     # def evaluate_answer(self, session, dataset, sample=100, log=False):
-    def evaluate_answer(self, session, dataset, vocab, sample=100, log=False):
+    def evaluate_answer(self, session, datasetaa, validation, sample=100, log=False):
         # Had to add vocab as an input here for train.py
         """
         Evaluate the model's performance using the harmonic mean of F1 and Exact Match (EM)
@@ -573,18 +573,27 @@ class QASystem(object):
         f1 = 0
         em = 0
         total = 0
-        data_len = len(dataset)
+        dataset = []
+        for i in range(len(validation)):
+            dataset.append(datasetaa[i] +(validation[i][1],))
         for i, batch in enumerate(minibatches(dataset,sample)):
-            question_batch, context_batch, answer_batch, question_mask_batch, context_mask_batch = batch
+            question_batch, context_batch, answer_batch, question_mask_batch, context_mask_batch, context_words = batch
             (a_ss, a_es) = self.answer(session, (question_batch, context_batch, question_mask_batch, context_mask_batch))
+
             # print (a_s)
             # print (a_e)
-            for a_s, a_e in zip(a_ss, a_es):
-                prediction = ' '.join([vocab[answer_batch[idx]] for idx in range(a_s, a_e + 1)])
+            for j in range(len(a_ss)):
+                prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], a_es[j] + 1)])
 
-                f_s = np.argmax(answer_batch[0], axis=1)
-                f_e = np.argmax(answer_batch[1], axis=1)
-                ground_truth = ' '.join([vocab[context[idx]] for idx in range(f_s, f_e + 1)])
+                f_s = np.argwhere(answer_batch[j] == 1)
+                f_e = np.argwhere(answer_batch[j] == 2)
+                if len(f_s) != 1:
+                    f_s = 0
+                if len(f_e) != 1:
+                    f_e = 0
+                # print("Compare start:",a_ss[j],f_s)
+                # print("Compare start:",a_es[j],f_e)
+                ground_truth = ' '.join([context_words[j][idx] for idx in range(f_s, f_e + 1)])
                 total += 1
                 em += exact_match_score(prediction, ground_truth)
                 f1 += f1_score(prediction, ground_truth)
@@ -675,19 +684,22 @@ class QASystem(object):
             # print("")
 
             logging.info("Evaluating on development data")
-            f1, em = self.evaluate_answer(session, validation_examples, vocab)
+            f1, em = self.evaluate_answer(session, validation_examples, validation)
+
+            print("f1:",f1)
+            print("EM:",em)
 
             if f1 > best_score:
                 best_score = f1
-                if saver:
-                    logging.info("New best score! Saving model in %s", train_dir)
-                    saver.save(sess, train_dir)
+                # if saver:
+                #     logging.info("New best score! Saving model in %s", train_dir)
+                #     saver.save(sess, train_dir)
             # print("")
             if self.report:
                 self.report.log_epoch()
                 self.report.save()
-            for i, batch in enumerate(minibatches(validation_examples, self.batch_size)):
-                valid_cost = self.validate(session,*batch)
+            # for i, batch in enumerate(minibatches(validation_examples, self.batch_size)):
+            #     valid_cost = self.validate(session,*batch)
 
         # some free code to print out number of parameters in your model
         # it's always good to check!
@@ -695,8 +707,8 @@ class QASystem(object):
         # so that you can use your trained model to make predictions, or
         # even continue training
 
-        tic = time.time()
-        params = tf.trainable_variables()
-        num_params = sum(map(lambda t: np.prod(t.value().get_shape().eval()), params))
-        toc = time.time()
-        logging.info("Number of params: %d (retreival took %f secs)" % (num_params, toc - tic))
+        # tic = time.time()
+        # params = tf.trainable_variables()
+        # num_params = sum(map(lambda t: np.prod(t.value().get_shape().eval()), params))
+        # toc = time.time()
+        # logging.info("Number of params: %d (retreival took %f secs)" % (num_params, toc - tic))

@@ -196,7 +196,7 @@ def main(_):
         qa.train(sess, dataset, embeddings, vocab, save_train_dir)
 
         # qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
-        qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
+        # qa.evaluate_answer(sess, dataset, val, log=True)
 
 
         #load_val_dir = get_normalized_train_dir(FLAGS.load_val_dir or FLAGS.val_dir)
