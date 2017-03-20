@@ -485,7 +485,8 @@ class QASystem(object):
         output_feed = [self.setup_system]
 
         outputs = session.run(output_feed, input_feed)
-
+        prob_s = outputs[:,0]
+        prob_e = outputs[:,1]
         return outputs
 
     def answer(self, session, test_x):
@@ -586,14 +587,14 @@ class QASystem(object):
 
 
         embed_dict = get_word2embed_dict(embeddings, vocab)
-        
+
         train_examples = preprocess_sequence_data(train, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
         validation_examples = preprocess_sequence_data(validation, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
 
         best_score = 0.
         for epoch in range(self.n_epochs):
 
-            logger.info("Epoch %d out of %d", epoch + 1, self.config.n_epochs)
+            logging.info("Epoch %d out of %d", epoch + 1, self.config.n_epochs)
             prog = Progbar(target=1 + int(len(train_examples) / self.batch_size))
 
             for i, batch in enumerate(minibatches(train_examples, self.batch_size)):
@@ -603,13 +604,13 @@ class QASystem(object):
                 if self.report: self.report.log_train_loss(loss)
             print("")
 
-            logger.info("Evaluating on development data")
+            logging.info("Evaluating on development data")
             f1, em = self.evaluate_answer(session, validation_examples, vocab)
 
             if f1 > best_score:
                 best_score = f1
                 if saver:
-                    logger.info("New best score! Saving model in %s", train_dir)
+                    logging.info("New best score! Saving model in %s", train_dir)
                     saver.save(sess, train_dir)
             print("")
             if self.report:
