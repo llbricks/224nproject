@@ -214,6 +214,8 @@ class Decoder(object):
         #assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
         #assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
 
+        print(decoded_probability[0].get_shape())
+
         return decoded_probability
 
 
@@ -266,6 +268,9 @@ class QASystem(object):
         to assemble your reading comprehension system!
         """
         self.pred = self.setup_prediction_op()
+        print('-------------------------------------------------------')
+        print(len(self.pred))
+        print(self.pred[0].get_shape())
         self.loss = self.setup_loss(self.pred)
         self.train_op = self.setup_training_op(self.loss)
 
@@ -509,16 +514,23 @@ class QASystem(object):
         output_feed = [self.pred]
 
         outputs = session.run(output_feed, input_feed)
-        prob_s = outputs[0][:][0]
-        prob_e = outputs[0][:][1]
+
+        print(len(outputs[0]))
+        print(outputs[0][0].shape)
+        preds = np.array(outputs[0])
+        print(preds.shape)
+        prob_s = preds[:,:,0]
+        prob_e = preds[:,:,1]
+        print(prob_s.shape)
+        print(prob_e.shape)
         return (prob_s, prob_e)
 
     def answer(self, session, test_x):
 
         yp, yp2 = self.decode(session, *test_x)
 
-        a_s = np.argmax(yp, axis=1)
-        a_e = np.argmax(yp2, axis=1)
+        a_s = np.argmax(yp, axis=0)
+        a_e = np.argmax(yp2, axis=0)
 
         return (a_s, a_e)
 
@@ -564,15 +576,18 @@ class QASystem(object):
         data_len = len(dataset)
         for i, batch in enumerate(minibatches(dataset,sample)):
             question_batch, context_batch, answer_batch, question_mask_batch, context_mask_batch = batch
-            (a_s, a_e) = self.answer(session, (question_batch, context_batch, question_mask_batch, context_mask_batch))
-            prediction = ' '.join([vocab[context[idx]] for idx in range(a_s, a_e + 1)])
+            (a_ss, a_es) = self.answer(session, (question_batch, context_batch, question_mask_batch, context_mask_batch))
+            # print (a_s)
+            # print (a_e)
+            for a_s, a_e in zip(a_ss, a_es):
+                prediction = ' '.join([vocab[answer_batch[idx]] for idx in range(a_s, a_e + 1)])
 
-            f_s = np.argmax(answer_batch[0], axis=1)
-            f_e = np.argmax(answer_batch[1], axis=1)
-            ground_truth = ' '.join([vocab[context[idx]] for idx in range(f_s, f_e + 1)])
-            total += 1
-            em += exact_match_score(prediction, ground_truth)
-            f1 += f1_score(prediction, ground_truth)
+                f_s = np.argmax(answer_batch[0], axis=1)
+                f_e = np.argmax(answer_batch[1], axis=1)
+                ground_truth = ' '.join([vocab[context[idx]] for idx in range(f_s, f_e + 1)])
+                total += 1
+                em += exact_match_score(prediction, ground_truth)
+                f1 += f1_score(prediction, ground_truth)
             if i == 0:
                 break
 
