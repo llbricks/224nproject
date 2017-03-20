@@ -105,7 +105,7 @@ class Encoder(object):
                 output = tf.nn.dropout(output, dropout)
                 print('output dropout ',output.get_shape().as_list())
                 print('batch size   ',batch_size.get_shape(), '        lstm size        ', lstm_size )
-                output =  tf.reshape(output,[batch_size,1,lstm_size])
+                output =  tf.reshape(output,[-1,1,lstm_size])#tf.reshape(output,[batch_size,1,lstm_size])
                 print('output reshape ',output.get_shape().as_list())
 
                 # print(output.get_shape())

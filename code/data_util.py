@@ -141,5 +141,8 @@ def pad(word_vector, n_features, max_length):
     word_vector = word_vector + padding
     word_vector_in = word_vector[:max_length]
     word_vector_mask = [True] * (max_length - pad_len) + [False] * pad_len
+    assert len(word_vector_in) == max_length, "Word vec: 'Embeddings' is of the wrong shape!"
+    assert len(word_vector_mask) == max_length, "Word vec: 'Embedding Mask' is of the wrong shape!"
+    #print('len word vect padded ', len(word_vector_in))
 
     return word_vector_in, word_vector_mask
