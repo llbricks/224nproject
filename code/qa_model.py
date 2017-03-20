@@ -671,15 +671,42 @@ class QASystem(object):
             # print('question shape:',len(question[0]))
             # print('context shape:',len(context))
             # print('context shape:',len(context[0]))
+            # print('context shape:',len(context[0][:]))
             # print('context shape:',context)
             # print('labels shape:',answer.shape)
             # print('question mask shape:',qmask.shape)
             # print('context mask shape:',cmask.shape)
 
             batched = minibatches(train_examples, self.batch_size)
+            question, context, qmask, cmask, answer = batched.next()
+            """
+            print(type(question))
+            print('q_b shape   ',question.shape)
+            print(type(context))
+            print('q_b shape   ',context.shape)
+            print(type(qmask))
+            print('q_b shape   ',qmask.shape)
+            print(type(cmask))
+            print('q_b shape   ',cmask.shape)
+            print(type(answer))
+            print('q_b shape   ',answer.shape)
+            """
+
             # print(type(batched))
 
             for i, batch in enumerate(batched):
+                print(type(batch))
+                question, context, qmask, cmask, answer = batch
+                print(type(question))
+                print('q_b shape   ',question.shape)
+                print(type(context))
+                print('q_b shape   ',context.shape)
+                print(type(qmask))
+                print('q_b shape   ',qmask.shape)
+                print(type(cmask))
+                print('q_b shape   ',cmask.shape)
+                print(type(answer))
+                print('q_b shape   ',answer.shape)
                 # print('its going ok so predfar!!!')
 
                 _, loss = self.optimize(session,*batch)
