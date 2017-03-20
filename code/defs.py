@@ -6,8 +6,8 @@ Common definitions for NER
 
 from util import one_hot
 
-LBLS = ["ANS_S", "ANS_E", "NOT"]
-NONE = "NOT"
+LBLS = [1, 2, 0]
+NONE = 0
 LMAP = {k: one_hot(3,i) for i, k in enumerate(LBLS)}
 NUM = "NNNUMMM"
 UNK = "UUUNKKK"

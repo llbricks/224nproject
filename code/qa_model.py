@@ -333,6 +333,8 @@ class QASystem(object):
         Set up your loss computation here
         :return:
         """
+        # mask_rs = tf.reshape(self.context_mask_placeholder,[tf.shape(pred)[0], 1, self.context_max_length])
+        # tf.tile(mask_rs,[1,self.n_classes,1])
         with vs.variable_scope("loss"):
             loss = tf.reduce_mean(
                    tf.boolean_mask(
@@ -427,8 +429,27 @@ class QASystem(object):
         # fill in this feed_dictionary like:
         # input_feed['train_x'] = train_x
 
-        output_feed = [self.train_op, self.loss]
+        print('question shape:',self.question_placeholder.get_shape().as_list())
+        print('context shape:',self.context_placeholder.get_shape().as_list())
+        print('labels shape:',self.labels_placeholder.get_shape().as_list())
+        print('question mask shape:',self.question_mask_placeholder.get_shape().as_list())
+        print('context mask shape:',self.context_mask_placeholder.get_shape().as_list())
 
+        print('question shape:',question_batch.shape)
+        print('context shape:',context_batch.shape)
+        print('labels shape:',answer_batch.shape)
+        print('question mask shape:',question_mask_batch.shape)
+        print('context mask shape:',context_mask_batch.shape)
+
+        # self.question_placeholder = tf.placeholder(tf.float32,(None,self.question_max_length,self.embedding_size))
+        # self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length,self.embedding_size))
+        # self.labels_placeholder = tf.placeholder(tf.int64,(None,self.context_max_length))
+        # self.question_mask_placeholder = tf.placeholder(tf.bool,(None,self.question_max_length))
+        # self.context_mask_placeholder = tf.placeholder(tf.bool,(None,self.context_max_length))
+
+
+        output_feed = [self.train_op, self.loss]
+        print()
         outputs = session.run(output_feed, input_feed)
 
         return outputs
@@ -468,7 +489,7 @@ class QASystem(object):
 
         return outputs
 
-    def decode(self, session, question_batch, context_batch, question_mask_batch, context_mask_batch):
+    def decode(self, session, question_batch, context_batch, question_mask_batch, context_mask_batch, answer_batch):
         """
         Returns the probability distribution over different positions in the paragraph
         so that other methods like self.answer() will be able to work properly
@@ -477,7 +498,9 @@ class QASystem(object):
         input_feed = self.create_feed_dict(question_batch = question_batch,
                                       context_batch = context_batch,
                                       question_mask_batch = question_mask_batch,
-                                      context_mask_batch = context_mask_batch)
+                                      context_mask_batch = context_mask_batch,
+                                      labels_batch = answer_batch,
+                                      dropout = self.dropout)
 
         # fill in this feed_dictionary like:
         # input_feed['test_x'] = test_x
@@ -599,6 +622,7 @@ class QASystem(object):
             prog = Progbar(target=1 + int(len(train_examples) / self.batch_size))
 
             for i, batch in enumerate(minibatches(train_examples, self.batch_size)):
+                print('its going ok so far!!!')
                 _, loss = self.optimize(session,*batch)
 
                 prog.update(i + 1, [("train loss", loss)])

@@ -4,6 +4,7 @@ from __future__ import print_function
 
 from defs import LBLS, NUM, UNK
 from collections import OrderedDict
+import numpy as np
 
 def get_word2embed_dict(embedding, vocab):
     """
@@ -74,6 +75,14 @@ def labelize(span, max_length):
         labels[span[0]] = LBLS[0]
     if span[1]< ml:
         labels[span[1]] = LBLS[1]
+    # labels = np.zeros([3, max_length])
+    # labels[0,:] = 1
+    # if span[0] < ml:
+    #     labels[0,span[0]] = 0
+    #     labels[1,span[0]] = 1
+    # if span[1]< ml:
+    #     labels[0,span[0]] = 0
+    #     labels[2,span[0]] = 1
 
     assert len(labels) == max_length, "Labelize: 'labels' is of the wrong shape!"
 
