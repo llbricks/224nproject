@@ -429,17 +429,17 @@ class QASystem(object):
         # fill in this feed_dictionary like:
         # input_feed['train_x'] = train_x
 
-        print('question shape:',self.question_placeholder.get_shape().as_list())
-        print('context shape:',self.context_placeholder.get_shape().as_list())
-        print('labels shape:',self.labels_placeholder.get_shape().as_list())
-        print('question mask shape:',self.question_mask_placeholder.get_shape().as_list())
-        print('context mask shape:',self.context_mask_placeholder.get_shape().as_list())
+        # print('question shape:',self.question_placeholder.get_shape().as_list())
+        # print('context shape:',self.context_placeholder.get_shape().as_list())
+        # print('labels shape:',self.labels_placeholder.get_shape().as_list())
+        # print('question mask shape:',self.question_mask_placeholder.get_shape().as_list())
+        # print('context mask shape:',self.context_mask_placeholder.get_shape().as_list())
 
-        print('question shape:',question_batch.shape)
-        print('context shape:',context_batch.shape)
-        print('labels shape:',answer_batch.shape)
-        print('question mask shape:',question_mask_batch.shape)
-        print('context mask shape:',context_mask_batch.shape)
+        # print('question shape:',question_batch.shape)
+        # print('context shape:',context_batch.shape)
+        # print('labels shape:',answer_batch.shape)
+        # print('question mask shape:',question_mask_batch.shape)
+        # print('context mask shape:',context_mask_batch.shape)
 
         # self.question_placeholder = tf.placeholder(tf.float32,(None,self.question_max_length,self.embedding_size))
         # self.context_placeholder = tf.placeholder(tf.float32,(None,self.context_max_length,self.embedding_size))
@@ -489,7 +489,8 @@ class QASystem(object):
 
         return outputs
 
-    def decode(self, session, question_batch, context_batch, question_mask_batch, context_mask_batch, answer_batch):
+    # def decode(self, session, question_batch, context_batch, question_mask_batch, context_mask_batch, answer_batch):
+    def decode(self, session, question_batch, context_batch, question_mask_batch, context_mask_batch):
         """
         Returns the probability distribution over different positions in the paragraph
         so that other methods like self.answer() will be able to work properly
@@ -499,18 +500,18 @@ class QASystem(object):
                                       context_batch = context_batch,
                                       question_mask_batch = question_mask_batch,
                                       context_mask_batch = context_mask_batch,
-                                      labels_batch = answer_batch,
+                                      # labels_batch = answer_batch,
                                       dropout = self.dropout)
 
         # fill in this feed_dictionary like:
         # input_feed['test_x'] = test_x
 
-        output_feed = [self.setup_system]
+        output_feed = [self.pred]
 
         outputs = session.run(output_feed, input_feed)
-        prob_s = outputs[:,0]
-        prob_e = outputs[:,1]
-        return outputs
+        prob_s = outputs[0][:][0]
+        prob_e = outputs[0][:][1]
+        return (prob_s, prob_e)
 
     def answer(self, session, test_x):
 
@@ -561,14 +562,19 @@ class QASystem(object):
         em = 0
         total = 0
         data_len = len(dataset)
-        for i in np.random.randint(data_len, size = sample):
-            (question, context, span, question_mask, context_mask) = dataset[i]
-            (a_s, a_e) = self.answer(session, (question, context, question_mask, context_mask))
+        for i, batch in enumerate(minibatches(dataset,sample)):
+            question_batch, context_batch, answer_batch, question_mask_batch, context_mask_batch = batch
+            (a_s, a_e) = self.answer(session, (question_batch, context_batch, question_mask_batch, context_mask_batch))
             prediction = ' '.join([vocab[context[idx]] for idx in range(a_s, a_e + 1)])
-            ground_truth = ' '.join([vocab[context[idx]] for idx in range(span[0], span[1] + 1)])
+
+            f_s = np.argmax(answer_batch[0], axis=1)
+            f_e = np.argmax(answer_batch[1], axis=1)
+            ground_truth = ' '.join([vocab[context[idx]] for idx in range(f_s, f_e + 1)])
             total += 1
             em += exact_match_score(prediction, ground_truth)
             f1 += f1_score(prediction, ground_truth)
+            if i == 0:
+                break
 
         em = 100.0 * em / total
         f1 = 100.0 * f1 / total
@@ -611,7 +617,7 @@ class QASystem(object):
 
         embed_dict = get_word2embed_dict(embeddings, vocab)
 
-        print('preprocessing train data')
+        # print('preprocessing train data')
         a,b,c = train[0]
 
 

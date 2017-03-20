@@ -72,9 +72,9 @@ def read_json(fstream):
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
 
-    context = open(fstream + '.context').read().split('\n')
-    question = open(fstream + '.question').read().split('\n')
-    answer = open(fstream + '.span').read().split('\n')
+    context = open(fstream + '.context').read().split('\n')[:100]
+    question = open(fstream + '.question').read().split('\n')[:100]
+    answer = open(fstream + '.span').read().split('\n')[:100]
     dataset = []
     for k in range(len(context)-1):
         #print(k,' out of ',len(context))

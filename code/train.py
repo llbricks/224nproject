@@ -21,7 +21,7 @@ tf.app.flags.DEFINE_float("learning_rate", 0.01, "Learning rate.")
 tf.app.flags.DEFINE_float("max_gradient_norm", 10.0, "Clip gradients to this norm.")
 tf.app.flags.DEFINE_float("dropout", 0.15, "Fraction of units randomly dropped on non-recurrent connections.")
 # tf.app.flags.DEFINE_integer("batch_size", 10, "Batch size to use during training.")
-tf.app.flags.DEFINE_integer("batch_size", 1, "Batch size to use during training.")
+tf.app.flags.DEFINE_integer("batch_size", 15, "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("epochs", 10, "Number of epochs to train.")
 tf.app.flags.DEFINE_integer("state_size", 200, "Size of each model layer.")
 # tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
@@ -117,9 +117,9 @@ def main(_):
     # read training data
 
     print('##########  READ TRAINING DATA ########## \n')
-    context = open(FLAGS.data_dir + 'train.context').read().split('\n')
-    question = open(FLAGS.data_dir + 'train.question').read().split('\n')
-    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
+    context = open(FLAGS.data_dir + 'train.context').read().split('\n')[:100]
+    question = open(FLAGS.data_dir + 'train.question').read().split('\n')[:100]
+    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')[:100]
     train = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
@@ -133,9 +133,9 @@ def main(_):
 
     # read test data
     print('##########  READ TEST DATA ########## \n')
-    context = open(FLAGS.data_dir + 'val.context').read().split('\n')
-    question = open(FLAGS.data_dir + 'val.question').read().split('\n')
-    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
+    context = open(FLAGS.data_dir + 'val.context').read().split('\n')[:100]
+    question = open(FLAGS.data_dir + 'val.question').read().split('\n')[:100]
+    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')[:100]
     val = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
