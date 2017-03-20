@@ -594,7 +594,7 @@ class QASystem(object):
         best_score = 0.
         for epoch in range(self.n_epochs):
 
-            logging.info("Epoch %d out of %d", epoch + 1, self.config.n_epochs)
+            logging.info("Epoch %d out of %d", epoch + 1, self.n_epochs)
             prog = Progbar(target=1 + int(len(train_examples) / self.batch_size))
 
             for i, batch in enumerate(minibatches(train_examples, self.batch_size)):
