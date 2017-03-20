@@ -4,7 +4,6 @@ from __future__ import print_function
 
 import time
 import logging
-import progbar as Progbar
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
@@ -418,7 +417,7 @@ class QASystem(object):
         :return:
         """
 
-        input_feed = create_feed_dict(question_batch = question_batch,
+        input_feed = self.create_feed_dict(question_batch = question_batch,
                                       context_batch = context_batch,
                                       question_mask_batch = question_mask_batch,
                                       context_mask_batch = context_mask_batch,
@@ -475,7 +474,7 @@ class QASystem(object):
         so that other methods like self.answer() will be able to work properly
         :return:
         """
-        input_feed = create_feed_dict(question_batch = question_batch,
+        input_feed = self.create_feed_dict(question_batch = question_batch,
                                       context_batch = context_batch,
                                       question_mask_batch = question_mask_batch,
                                       context_mask_batch = context_mask_batch)

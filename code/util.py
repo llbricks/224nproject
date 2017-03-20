@@ -53,9 +53,9 @@ def read_json_ids(fstream):
     # Do what you need to load datasets from FLAGS.data_dir
     dataset = None
 
-    ids_context = open(fstream + '.ids.context').read().split('\n')
-    ids_question = open(fstream + '.ids.question').read().split('\n')
-    ids_answer = open(fstream + '.span').read().split('\n')
+    ids_context = open(fstream + '.ids.context').read().split('\n')[:,100]
+    ids_question = open(fstream + '.ids.question').read().split('\n')[:,100]
+    ids_answer = open(fstream + '.span').read().split('\n')[:,100]
     dataset = []
     for k in xrange(len(ids_context)):
         L = [map(int,ids_question[k].split())]
