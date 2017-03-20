@@ -11,10 +11,11 @@ def get_word2embed_dict(embedding, vocab):
     Assumes each line of the vocab file matches with those of the embedding
     file.
     """  
+    embd_size = len(embedding[0])
     ret = OrderedDict()
     for key in vocab.keys(): 
         ret[key] = embedding[vocab[key]]
-
+    ret[UNK] = [0]*embd_size
     return ret
 
 
