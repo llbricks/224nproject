@@ -54,7 +54,7 @@ def preprocess_sequence_data(dataset, embed_dict, question_max_length, context_m
         # print("context_data:",len(context_data))
         # print("context_data:",len(context_data[0]))
 
-        ret.append((question_data, context_data,
+        ret.append((question_embed, context_embed,
                     answer_labels,
                     question_mask, context_mask))
 
