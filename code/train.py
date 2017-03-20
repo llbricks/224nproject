@@ -41,7 +41,7 @@ tf.app.flags.DEFINE_string("embed_path", "../../data/squad/glove.trimmed.100.npz
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 # tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
-tf.app.flags.DEFINE_string("question_size", 5, "Size of question (default: 70)")
+tf.app.flags.DEFINE_string("question_size", 15, "Size of question (default: 70)")
 
 tf.app.flags.DEFINE_string("n_classes", 3, "Number of output classes (default: 2)")
 

@@ -27,12 +27,20 @@ def preprocess_sequence_data(dataset, embed_dict, question_max_length, context_m
         # replace tokens with corresponding embedding
         question_embed = embed(question, embed_dict)
         context_embed = embed(context, embed_dict)
+        # print("question_embed:",len(question_embed))
+        # print("question_embed:",len(question_embed[0]))
+        # print("context_embed:",len(context_embed))
+        # print("context_embed:",len(context_embed[0]))
         # create list of labels of max_length
         answer_labels = labelize(answer_span, context_max_length)
         # pad question and context to be max_length
         # also return masks for BOTH question and context
         question_data, question_mask = pad(question_embed, n_features, question_max_length)
         context_data, context_mask = pad(context_embed, n_features, context_max_length)
+        # print("question_data:",len(question_data))
+        # print("question_data:",len(question_data[0]))
+        # print("context_data:",len(context_data))
+        # print("context_data:",len(context_data[0]))
 
         ret.append((question_data, context_data,
                     answer_labels,

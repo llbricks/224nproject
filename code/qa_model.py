@@ -621,8 +621,30 @@ class QASystem(object):
             logging.info("Epoch %d out of %d", epoch + 1, self.n_epochs)
             prog = Progbar(target=1 + int(len(train_examples) / self.batch_size))
 
-            for i, batch in enumerate(minibatches(train_examples, self.batch_size)):
+            question, context, qmask, cmask, answer = train_examples[0]
+
+            print('question shape:',len(question))
+            print('question shape:',len(question[0]))
+            print('context shape:',len(context))
+            print('context shape:',len(context[0]))
+            # print('context shape:',context)
+            # print('labels shape:',answer.shape)
+            # print('question mask shape:',qmask.shape)
+            # print('context mask shape:',cmask.shape)
+
+            batched = minibatches(train_examples, self.batch_size)
+            print(type(batched))
+
+
+            print('question shape:',question.shape)
+            print('context shape:',context.shape)
+            print('labels shape:',answer.shape)
+            print('question mask shape:',qmask.shape)
+            print('context mask shape:',cmask.shape)
+
+            for i, batch in enumerate(batched):
                 print('its going ok so far!!!')
+
                 _, loss = self.optimize(session,*batch)
 
                 prog.update(i + 1, [("train loss", loss)])
