@@ -11,6 +11,7 @@ import tensorflow as tf
 from tensorflow.python.ops import variable_scope as vs
 from defs import LBLS
 from tensorflow.python.ops.gen_math_ops import _batch_mat_mul as batch_matmul
+from util import ConfusionMatrix, Progbar, minibatches
 
 from lstm_cell import LSTMCell
 

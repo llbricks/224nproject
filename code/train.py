@@ -144,7 +144,7 @@ def main(_):
     #     val.append((L))
 
 
-    dataset = (train, val)
+    dataset = (train[:100], val[:10])
 
     # read word embeddings
     print('##########  READ WORD EMBEDDINGS ########## \n')
