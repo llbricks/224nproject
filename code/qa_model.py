@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import time
 import logging
-
+import progbar as Progbar
 import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
