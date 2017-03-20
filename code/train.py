@@ -89,6 +89,21 @@ def get_normalized_train_dir(train_dir):
     os.symlink(os.path.abspath(train_dir), global_train_dir)
     return global_train_dir
 
+def get_normalized_val_dir(train_dir):
+    """
+    Adds symlink to {train_dir} from /tmp/cs224n-squad-train to canonicalize the
+    file paths saved in the checkpoint. This allows the model to be reloaded even
+    if the location of the checkpoint files has moved, allowing usage with CodaLab.
+    This must be done on both train.py and qa_answer.py in order to work.
+    """
+    global_train_dir = '/tmp/cs224n-squad-train'
+    if os.path.exists(global_train_dir):
+        os.unlink(global_train_dir)
+    if not os.path.exists(train_dir):
+        os.makedirs(train_dir)
+    os.symlink(os.path.abspath(train_dir), global_train_dir)
+    return global_train_dir
+
 
 def main(_):
 
@@ -167,7 +182,7 @@ def main(_):
         json.dump(FLAGS.__flags, fout)
 
     # run training on QA model on training data
-    print('\n ########## START TRAINING ############## \n')
+    print('\n ##########    START TRAINING   ############## \n')
     with tf.Session() as sess:
         load_train_dir = get_normalized_train_dir(FLAGS.load_train_dir or FLAGS.train_dir)
         initialize_model(sess, qa, load_train_dir)
@@ -180,8 +195,8 @@ def main(_):
         qa.evaluate_answer(sess, dataset, vocab, FLAGS.evaluate, log=True)
 
 
-        load_val_dir = get_normalized_train_dir(FLAGS.load_val_dir or FLAGS.val_dir)
-        qa.validate( sess, load_val_dir)
+        #load_val_dir = get_normalized_train_dir(FLAGS.load_val_dir or FLAGS.val_dir)
+        #qa.validate( sess, load_val_dir)
 
 if __name__ == "__main__":
     tf.app.run()

@@ -510,7 +510,7 @@ class QASystem(object):
         :return:
         """
         valid_cost = 0
-
+        valide_dataset.get_shape()
         for valid_x, valid_y in valid_dataset:
           valid_cost += self.test(sess, valid_x, valid_y)
 
@@ -614,6 +614,8 @@ class QASystem(object):
             if self.report:
                 self.report.log_epoch()
                 self.report.save()
+            for i, batch in enumerate(minibatches(validation_examples, self.batch_size)):
+                valid_cost = self.validate(session,*batch)
 
         # some free code to print out number of parameters in your model
         # it's always good to check!
