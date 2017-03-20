@@ -251,9 +251,9 @@ class QASystem(object):
 
         self.dropout_placeholder = tf.placeholder(tf.float32)
         # ==== assemble pieces ====
-        with tf.variable_scope("qa", initializer=tf.uniform_unit_scaling_initializer(1.0)):
+        # with tf.variable_scope("qa", initializer=tf.uniform_unit_scaling_initializer(1.0)):
             #self.setup_embeddings()
-            self.setup_system()
+            # self.setup_system()
             # self.setup_loss()
 
         # ==== set up training/updating procedure ====
@@ -584,7 +584,14 @@ class QASystem(object):
         """
         (train, validation) = dataset
 
+
         embed_dict = get_word2embed_dict(embeddings, vocab)
+        print('embd_dict keys: ', embed_dict.keys()[:5])
+        print('embd_dict values: ', embed_dict.values()[:5])
+        if('UUUNKKK' in embed_dict.keys()):
+            print('UUUNKKK')
+        else:
+            print('UUUNKKK not found')
 
         train_examples = preprocess_sequence_data(train, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
         validation_examples = preprocess_sequence_data(validation, embed_dict, self.question_max_length, self.context_max_length, self.embedding_size)
