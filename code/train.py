@@ -24,7 +24,7 @@ tf.app.flags.DEFINE_float("dropout", 0.15, "Fraction of units randomly dropped o
 tf.app.flags.DEFINE_integer("batch_size", 16, "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("epochs", 10, "Number of epochs to train.")
 tf.app.flags.DEFINE_integer("state_size", 200, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("output_size", 500, "The output size of your model.")
+tf.app.flags.DEFINE_integer("output_size", 750, "The output size of your model.")
 # tf.app.flags.DEFINE_integer("output_size", 17, "The output size of your model.")
 tf.app.flags.DEFINE_integer("embedding_size", 100, "Size of the pretrained vocabulary.")
 tf.app.flags.DEFINE_string("data_dir", "../../data/squad/", "SQuAD directory (default ../../data/squad)")
@@ -41,7 +41,7 @@ tf.app.flags.DEFINE_string("embed_path", "../../data/squad/glove.trimmed.100.npz
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 # tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
-tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
+tf.app.flags.DEFINE_string("question_size", 60, "Size of question (default: 70)")
 
 tf.app.flags.DEFINE_string("n_classes", 3, "Number of output classes (default: 2)")
 
@@ -124,6 +124,12 @@ def main(_):
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
         train.append((question[k].split(' '),context[k].split(' '),ans_intList))
+    questionLenList = [len(q) for q in question]
+    meanQuestLen = sum(questionLenList)/len(questionLenList)
+    print("AVERAGE QUESTION LENGTH = ", meanQuestLen)
+    contextLenList = [len(c) for c in context]
+    meanCLen = sum(contextLenList)/len(contextLenList)
+    print("AVERAGE CONTEXT LENGTH = ", meanCLen)
 
     # for k in xrange(len(context)):
         # L = [map(int,question[k].split())]

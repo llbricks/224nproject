@@ -101,13 +101,13 @@ class Encoder(object):
                 print('SIZE HIDDEN MASK',masks[:,word_step].get_shape(),'-----------------------')
                 print('SIZE OUTPUT',output.get_shape(),'-----------------------')
 
-                output = tf.boolean_mask(output,masks[:,word_step],name='boolean_mask')
+                # output = tf.boolean_mask(output,masks[:,word_step],name='boolean_mask')
                 print('output bolean mask  ',output.get_shape().as_list())
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
                 print('output dropout ',output.get_shape().as_list())
                 print('batch size   ',batch_size.get_shape(), '        lstm size        ', lstm_size )
-                output =  tf.reshape(output,[-1,1,lstm_size])#tf.reshape(output,[batch_size,1,lstm_size])
+                output =  tf.reshape(output,[batch_size,1,lstm_size])#tf.reshape(output,[batch_size,1,lstm_size])
                 print('output reshape ',output.get_shape().as_list())
 
                 # print(output.get_shape())

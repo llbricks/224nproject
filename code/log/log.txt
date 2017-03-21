@@ -720,3 +720,9 @@ Evaluating on development data
 Epoch 2 out of 10
 Evaluating on development data
 Epoch 3 out of 10
+Created model with fresh parameters.
+Num params: 482803
+Epoch 1 out of 10
+Created model with fresh parameters.
+Num params: 482803
+Epoch 1 out of 10
