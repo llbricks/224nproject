@@ -139,9 +139,9 @@ def main(_):
 
     # read test data
     print('##########  READ TEST DATA ########## \n')
-    context = open(FLAGS.data_dir + 'val.context').read().split('\n')[:100]
-    question = open(FLAGS.data_dir + 'val.question').read().split('\n')[:100]
-    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')[:100]
+    context = open(FLAGS.data_dir + 'val.context').read().split('\n')[:1000]
+    question = open(FLAGS.data_dir + 'val.question').read().split('\n')[:1000]
+    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')[:1000]
     val = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]

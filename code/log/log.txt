@@ -785,3 +785,7 @@ Evaluating on development data
 Epoch 6 out of 10
 Evaluating on development data
 Epoch 7 out of 10
+Evaluating on development data
+Epoch 8 out of 10
+Evaluating on development data
+Epoch 9 out of 10
