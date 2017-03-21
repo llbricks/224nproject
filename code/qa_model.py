@@ -86,7 +86,7 @@ class Encoder(object):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
 
-                hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,int(inpute_size)])
+                hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,embedding_size])
                 output, state = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
                 """print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())

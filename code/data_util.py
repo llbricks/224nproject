@@ -134,16 +134,30 @@ def labelize(span, max_length):
 
 def pad(word_vector, n_features, max_length):
     # initialize padding variables
-    zero_vector = [np.zeros(n_features)]
+    zero_vector = np.zeros(100)
     zero_label = 0
     # pad word_vector to max_length
     pad_len = max(max_length - len(word_vector), 0)
     padding = zero_vector * pad_len
-    word_vector = word_vector + padding
-    word_vector_in = word_vector[:max_length]
+    #word_vector = word_vector + padding
+    # word_vector_in = word_vector[:max_length]
+    word_vector_in = [zero_vector]*max_length
+    print("LENGTH OF WORD VECTOR BEFORE:",len(word_vector_in),'--------------------------------')
+    print('SIZE OF ZERO ELEMENT: ', word_vector_in[0].shape)
+
+    if len(word_vector)<max_length:
+        word_vector_in[:len(word_vector)] = word_vector
+        print("LENGTH OF PADDED:",len(word_vector_in),'--------------------------------')
+    else: 
+        word_vector_in = word_vector[:max_length]
+        print("LENGTH OF CUT:",len(word_vector_in),'--------------------------------')
+    print('SIZE OF SENTENCE ELEMENT: ', word_vector_in[0].shape)
+
+
     word_vector_mask = [True] * (max_length - pad_len) + [False] * pad_len
     assert len(word_vector_in) == max_length, "Word vec: 'Embeddings' is of the wrong shape!"
     assert len(word_vector_mask) == max_length, "Word vec: 'Embedding Mask' is of the wrong shape!"
+
     #print('len word vect padded ', len(word_vector_in))
 
     return word_vector_in, word_vector_mask

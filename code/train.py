@@ -24,7 +24,7 @@ tf.app.flags.DEFINE_float("dropout", 0.15, "Fraction of units randomly dropped o
 tf.app.flags.DEFINE_integer("batch_size", 16, "Batch size to use during training.")
 tf.app.flags.DEFINE_integer("epochs", 10, "Number of epochs to train.")
 tf.app.flags.DEFINE_integer("state_size", 200, "Size of each model layer.")
-tf.app.flags.DEFINE_integer("output_size", 20, "The output size of your model.")
+tf.app.flags.DEFINE_integer("output_size", 500, "The output size of your model.")
 # tf.app.flags.DEFINE_integer("output_size", 17, "The output size of your model.")
 tf.app.flags.DEFINE_integer("embedding_size", 100, "Size of the pretrained vocabulary.")
 tf.app.flags.DEFINE_string("data_dir", "../../data/squad/", "SQuAD directory (default ../../data/squad)")
@@ -41,7 +41,7 @@ tf.app.flags.DEFINE_string("embed_path", "../../data/squad/glove.trimmed.100.npz
 # user made flags
 tf.app.flags.DEFINE_string("embed_type", "glove", "Type of embedding used (default: glove)")
 # tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
-tf.app.flags.DEFINE_string("question_size", 15, "Size of question (default: 70)")
+tf.app.flags.DEFINE_string("question_size", 70, "Size of question (default: 70)")
 
 tf.app.flags.DEFINE_string("n_classes", 3, "Number of output classes (default: 2)")
 
@@ -117,9 +117,9 @@ def main(_):
     # read training data
 
     print('##########  READ TRAINING DATA ########## \n')
-    context = open(FLAGS.data_dir + 'train.context').read().split('\n')[:100]
-    question = open(FLAGS.data_dir + 'train.question').read().split('\n')[:100]
-    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')[:100]
+    context = open(FLAGS.data_dir + 'train.context').read().split('\n')
+    question = open(FLAGS.data_dir + 'train.question').read().split('\n')
+    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
     train = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
@@ -133,9 +133,9 @@ def main(_):
 
     # read test data
     print('##########  READ TEST DATA ########## \n')
-    context = open(FLAGS.data_dir + 'val.context').read().split('\n')[:100]
-    question = open(FLAGS.data_dir + 'val.question').read().split('\n')[:100]
-    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')[:100]
+    context = open(FLAGS.data_dir + 'val.context').read().split('\n')
+    question = open(FLAGS.data_dir + 'val.question').read().split('\n')
+    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
     val = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
@@ -188,10 +188,12 @@ def main(_):
     # run training on QA model on training data
     print('\n ##########    START TRAINING   ############## \n')
     with tf.Session() as sess:
-        load_train_dir = get_normalized_train_dir(FLAGS.load_train_dir or FLAGS.train_dir)
+        # load_train_dir = get_normalized_train_dir(FLAGS.load_train_dir or FLAGS.train_dir)
+        load_train_dir = FLAGS.train_dir
         initialize_model(sess, qa, load_train_dir)
 
-        save_train_dir = get_normalized_train_dir(FLAGS.train_dir)
+        # save_train_dir = get_normalized_train_dir(FLAGS.train_dir)
+        save_train_dir = FLAGS.train_dir
         # qa.train(sess, dataset, save_train_dir)
         qa.train(sess, dataset, embeddings, vocab, save_train_dir)
 
