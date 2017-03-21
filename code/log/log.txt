@@ -729,3 +729,22 @@ Epoch 1 out of 10
 Created model with fresh parameters.
 Num params: 482803
 Epoch 1 out of 10
+Evaluating on development data
+Epoch 2 out of 10
+Evaluating on development data
+Epoch 3 out of 10
+Evaluating on development data
+Epoch 4 out of 10
+Evaluating on development data
+Epoch 5 out of 10
+Evaluating on development data
+Epoch 6 out of 10
+Evaluating on development data
+Epoch 7 out of 10
+Evaluating on development data
+Epoch 8 out of 10
+Evaluating on development data
+Epoch 9 out of 10
+Evaluating on development data
+Epoch 10 out of 10
+Evaluating on development data
