@@ -126,10 +126,10 @@ def main(_):
         train.append((question[k].split(' '),context[k].split(' '),ans_intList))
     questionLenList = [len(q) for q in question]
     meanQuestLen = sum(questionLenList)/len(questionLenList)
-    print("AVERAGE QUESTION LENGTH = ", meanQuestLen)
+    #print("AVERAGE QUESTION LENGTH = ", meanQuestLen)
     contextLenList = [len(c) for c in context]
     meanCLen = sum(contextLenList)/len(contextLenList)
-    print("AVERAGE CONTEXT LENGTH = ", meanCLen)
+    #print("AVERAGE CONTEXT LENGTH = ", meanCLen)
 
     # for k in xrange(len(context)):
         # L = [map(int,question[k].split())]

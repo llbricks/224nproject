@@ -85,7 +85,7 @@ class Encoder(object):
             for word_step in xrange(inputs.get_shape()[1]):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-                print('SIZE MASK',masks[:,word_step].get_shape(),'-----------------------')
+                #print('SIZE MASK',masks[:,word_step].get_shape(),'-----------------------')
                 # hidden_mask = tf.tile(masks[:,word_step], [1,lstm_size])
                 output, state = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
                 """print('\n ~ ~ ~ Output shape' )
@@ -98,17 +98,17 @@ class Encoder(object):
                 print(inputs.get_shape()[1])s
                 print(hidden_mask[:,word_step-1])"""
                 # print(output.get_shape())
-                print('SIZE HIDDEN MASK',masks[:,word_step].get_shape(),'-----------------------')
-                print('SIZE OUTPUT',output.get_shape(),'-----------------------')
+                #print('SIZE HIDDEN MASK',masks[:,word_step].get_shape(),'-----------------------')
+                #print('SIZE OUTPUT',output.get_shape(),'-----------------------')
 
                 # output = tf.boolean_mask(output,masks[:,word_step],name='boolean_mask')
-                print('output bolean mask  ',output.get_shape().as_list())
+                #print('output bolean mask  ',output.get_shape().as_list())
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
-                print('output dropout ',output.get_shape().as_list())
-                print('batch size   ',batch_size.get_shape(), '        lstm size        ', lstm_size )
+                #print('output dropout ',output.get_shape().as_list())
+                #print('batch size   ',batch_size.get_shape(), '        lstm size        ', lstm_size )
                 output =  tf.reshape(output,[batch_size,1,lstm_size])#tf.reshape(output,[batch_size,1,lstm_size])
-                print('output reshape ',output.get_shape().as_list())
+                #print('output reshape ',output.get_shape().as_list())
 
                 # print(output.get_shape())
                 #print('\n ~ ~ ~ Output shape' )
@@ -129,45 +129,6 @@ class Encoder(object):
 class Decoder(object):
     def __init__(self, output_size):
         self.output_size = output_size
-
-    def decode_lstm(self, knowledge_rep, scope, lstm_size, n_classes):
-        """
-        takes in a knowledge representation
-        and output a probability estimation over
-        all paragraph tokens on which token should be
-        the start of the answer span, and which should be
-        the end of the answer span.
-
-        :param knowledge_rep: it is a representation of the paragraph and question,
-                              decided by how you choose to implement the encoder
-        :return:
-        """
-        # CONCERNS -------------------------------------------
-        # ALL h VALUES INITIALIZED TO ZERO FOR NOW
-        # THIS JUST CONFUSES ME NOW, don't use this function, use decode_simple
-        # ----------------------------------------------------
-        batch_size = tf.shape(knowledge_rep)[0]
-        passage_size = knowledge_rep.get_shape()[0]
-        lstm = tf.nn.rnn_cell.BasicLSTMCell(lstm_size, state_is_tuple = False)
-
-        # LSTM for decoded_start
-        decoded_probability = []
-        h = tf.zeros(shape = [self.batch_size, lstm_size], dtype = tf.float32)
-        with tf.variable_scope(scope):
-            #setup variables for this scope
-            softmax_w = tf.get_variable("softmax_w",
-                            shape = [lstm_size,n_classes],
-                            initializer = tf.contrib.layers.xavier_initializer())
-            softmax_b = tf.get_variable("softmax_b", tf.zeros(self.n_classes), dtype = tf.float32)
-
-            # make LSTM for this scope
-            for time_step in range(passage_size):
-                output, h = lstm(knowledge_rep[:,self.question_max_length +time_step], h, scope = scope)
-                logits = tf.batch_matmul(output, softmax_w) + softmax_b
-                # is it the logits we want?
-                decoded.append(logits)
-
-        return (decoded_probability)
 
     def decode_simple(self, question_state, context_words, lstm_size,n_classes):
         """
@@ -221,7 +182,7 @@ class Decoder(object):
         #assert decoded_probability[0].get_shape()[0] == batch_size, 'Decode_simple: decoded is not expected shape'
         #assert decoded_probability[0].get_shape()[1] == n_classes, 'Decode_simple: decoded is not expected shape'
 
-        print(decoded_probability[0].get_shape())
+        #print(decoded_probability[0].get_shape())
 
         return decoded_probability
 
@@ -275,9 +236,9 @@ class QASystem(object):
         to assemble your reading comprehension system!
         """
         self.pred = self.setup_prediction_op()
-        print('-------------------------------------------------------')
-        print(len(self.pred))
-        print(self.pred[0].get_shape())
+        # print('-------------------------------------------------------')
+        # print(len(self.pred))
+        # print(self.pred[0].get_shape())
         self.loss = self.setup_loss(self.pred)
         self.train_op = self.setup_training_op(self.loss)
 
@@ -461,7 +422,6 @@ class QASystem(object):
 
 
         output_feed = [self.train_op, self.loss]
-        print()
         outputs = session.run(output_feed, input_feed)
 
         return outputs
@@ -522,14 +482,14 @@ class QASystem(object):
 
         outputs = session.run(output_feed, input_feed)
 
-        print(len(outputs[0]))
-        print(outputs[0][0].shape)
+        # print(len(outputs[0]))
+        # print(outputs[0][0].shape)
         preds = np.array(outputs[0])
-        print(preds.shape)
+        # print(preds.shape)
         prob_s = preds[:,:,0]
         prob_e = preds[:,:,1]
-        print(prob_s.shape)
-        print(prob_e.shape)
+        # print(prob_s.shape)
+        # print(prob_e.shape)
         return (prob_s, prob_e)
 
     def answer(self, session, test_x):
@@ -697,18 +657,18 @@ class QASystem(object):
             # print(type(batched))
 
             for i, batch in enumerate(batched):
-                print(type(batch))
+                # print(type(batch))
                 question, context, qmask, cmask, answer = batch
-                print(type(question))
-                print('q_b shape   ',question.shape)
-                print(type(context))
-                print('q_b shape   ',context.shape)
-                print(type(qmask))
-                print('q_b shape   ',qmask.shape)
-                print(type(cmask))
-                print('q_b shape   ',cmask.shape)
-                print(type(answer))
-                print('q_b shape   ',answer.shape)
+                # print(type(question))
+                # print('q_b shape   ',question.shape)
+                # print(type(context))
+                # print('q_b shape   ',context.shape)
+                # print(type(qmask))
+                # print('q_b shape   ',qmask.shape)
+                # print(type(cmask))
+                # print('q_b shape   ',cmask.shape)
+                # print(type(answer))
+                # print('q_b shape   ',answer.shape)
                 # print('its going ok so predfar!!!')
 
                 _, loss = self.optimize(session,*batch)

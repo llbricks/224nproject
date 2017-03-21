@@ -142,16 +142,16 @@ def pad(word_vector, n_features, max_length):
     #word_vector = word_vector + padding
     # word_vector_in = word_vector[:max_length]
     word_vector_in = [zero_vector]*max_length
-    print("LENGTH OF WORD VECTOR BEFORE:",len(word_vector_in),'--------------------------------')
-    print('SIZE OF ZERO ELEMENT: ', word_vector_in[0].shape)
+    # print("LENGTH OF WORD VECTOR BEFORE:",len(word_vector_in),'--------------------------------')
+    # print('SIZE OF ZERO ELEMENT: ', word_vector_in[0].shape)
 
     if len(word_vector)<max_length:
         word_vector_in[:len(word_vector)] = word_vector
-        print("LENGTH OF PADDED:",len(word_vector_in),'--------------------------------')
+        # print("LENGTH OF PADDED:",len(word_vector_in),'--------------------------------')
     else: 
         word_vector_in = word_vector[:max_length]
-        print("LENGTH OF CUT:",len(word_vector_in),'--------------------------------')
-    print('SIZE OF SENTENCE ELEMENT: ', word_vector_in[0].shape)
+        # print("LENGTH OF CUT:",len(word_vector_in),'--------------------------------')
+    # print('SIZE OF SENTENCE ELEMENT: ', word_vector_in[0].shape)
 
 
     word_vector_mask = [True] * (max_length - pad_len) + [False] * pad_len
