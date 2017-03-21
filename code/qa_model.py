@@ -85,8 +85,8 @@ class Encoder(object):
             for word_step in xrange(inputs.get_shape()[1]):
                 if word_step >= 1:
                     tf.get_variable_scope().reuse_variables()
-
-                hidden_mask = tf.tile(tf.expand_dims(masks[:,word_step],1), [1,embedding_size])
+                print('SIZE MASK',masks[:,word_step].get_shape(),'-----------------------')
+                # hidden_mask = tf.tile(masks[:,word_step], [1,lstm_size])
                 output, state = lstm(inputs[:,word_step],state, scope = scope )#*masks[:,word_step]
                 """print('\n ~ ~ ~ Output shape' )
                 print(output.get_shape())
@@ -98,8 +98,10 @@ class Encoder(object):
                 print(inputs.get_shape()[1])s
                 print(hidden_mask[:,word_step-1])"""
                 # print(output.get_shape())
+                print('SIZE HIDDEN MASK',masks[:,word_step].get_shape(),'-----------------------')
+                print('SIZE OUTPUT',output.get_shape(),'-----------------------')
 
-                output = tf.boolean_mask(output,hidden_mask[:,word_step],name='boolean_mask')
+                output = tf.boolean_mask(output,masks[:,word_step],name='boolean_mask')
                 print('output bolean mask  ',output.get_shape().as_list())
                 # apply dropout
                 output = tf.nn.dropout(output, dropout)
