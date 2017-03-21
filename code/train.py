@@ -117,9 +117,9 @@ def main(_):
     # read training data
 
     print('##########  READ TRAINING DATA ########## \n')
-    context = open(FLAGS.data_dir + 'train.context').read().split('\n')[:1000]
-    question = open(FLAGS.data_dir + 'train.question').read().split('\n')[:1000]
-    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')[:1000]
+    context = open(FLAGS.data_dir + 'train.context').read().split('\n')
+    question = open(FLAGS.data_dir + 'train.question').read().split('\n')
+    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')
     train = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
@@ -139,9 +139,9 @@ def main(_):
 
     # read test data
     print('##########  READ TEST DATA ########## \n')
-    context = open(FLAGS.data_dir + 'val.context').read().split('\n')[:1000]
-    question = open(FLAGS.data_dir + 'val.question').read().split('\n')[:1000]
-    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')[:1000]
+    context = open(FLAGS.data_dir + 'val.context').read().split('\n')
+    question = open(FLAGS.data_dir + 'val.question').read().split('\n')
+    answer_span = open(FLAGS.data_dir + 'val.span').read().split('\n')
     val = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]
@@ -154,7 +154,7 @@ def main(_):
     #     val.append((L))
 
 
-    dataset = (train[:1000], val[:100])
+    dataset = (train, val)
 
     # read word embeddings
     print('##########  READ WORD EMBEDDINGS ########## \n')
