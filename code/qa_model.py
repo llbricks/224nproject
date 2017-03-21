@@ -550,8 +550,10 @@ class QASystem(object):
             # print (a_s)
             # print (a_e)
             for j in range(len(a_ss)):
-                prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], a_es[j] + 1)])
-
+                if ((a_ss[j] < self.context_max_length & (a_es[j]) < self.context_max_length)):
+                    prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], a_es[j] + 1)])
+                elif (a_ss[j] < self.context_max_length):
+                    prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], self.context_max_length)])
                 f_s = np.argwhere(answer_batch[j] == 1)
                 f_e = np.argwhere(answer_batch[j] == 2)
                 if len(f_s) != 1:
