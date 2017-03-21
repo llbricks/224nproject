@@ -117,9 +117,9 @@ def main(_):
     # read training data
 
     print('##########  READ TRAINING DATA ########## \n')
-    context = open(FLAGS.data_dir + 'train.context').read().split('\n')[:100]
-    question = open(FLAGS.data_dir + 'train.question').read().split('\n')[:100]
-    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')[:100]
+    context = open(FLAGS.data_dir + 'train.context').read().split('\n')[:1000]
+    question = open(FLAGS.data_dir + 'train.question').read().split('\n')[:1000]
+    answer_span = open(FLAGS.data_dir + 'train.span').read().split('\n')[:1000]
     train = []
     for k in range(len(context)-1):
         ans_intList = [int(value) for value in answer_span[k].split(' ')]

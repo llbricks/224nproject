@@ -551,10 +551,14 @@ class QASystem(object):
             # print (a_e)
             for j in range(len(a_ss)):
                 c_len = len(context_words[j])
-                if ((a_ss[j] < c_len & (a_es[j]) < c_len)):
+                # print(c_len)
+                # print(a_ss[j])
+                # print(a_es[j])
+                # print(context_words[j])
+                if ((a_ss[j] < c_len-1) & (a_es[j] < c_len-1)):
                     prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], a_es[j] + 1)])
-                elif (a_ss[j] < c_len):
-                    prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], c_len)])
+                elif (a_ss[j] < c_len-1):
+                    prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], c_len-1)])
                 else:
                     prediction = [' ']
                 f_s = np.argwhere(answer_batch[j] == 1)
