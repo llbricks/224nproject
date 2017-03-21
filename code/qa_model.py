@@ -554,6 +554,8 @@ class QASystem(object):
                     prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], a_es[j] + 1)])
                 elif (a_ss[j] < self.context_max_length):
                     prediction = ' '.join([context_words[j][idx] for idx in range(a_ss[j], self.context_max_length)])
+                else:
+                    prediction = [' ']
                 f_s = np.argwhere(answer_batch[j] == 1)
                 f_e = np.argwhere(answer_batch[j] == 2)
                 if len(f_s) != 1:
